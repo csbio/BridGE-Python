@@ -16,6 +16,6 @@ import matplotlib.pyplot as plt
 # pv - p-value
 
 def hygetest(n,d,k,m):
-    pv = hypergeom.cdf(k-1,n,m,d)
-    logpv = -np.log10(pv)
-    return logpv, pv
+    pv = 1 - hypergeom.cdf(k-1,n,m,d)
+    #logpv = -np.log10(pv)
+    return pv
