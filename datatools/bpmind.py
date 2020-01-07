@@ -13,22 +13,36 @@ def bpmind(snpPathwayFile):
 
     # Retrieving pathways list from snpset
     pathways = snpset.pathways
-    print(pathways)
+    snpmat = snpset.spmatrix
+    snpfile = snpset.geneset
 
     # Finding all possible combinations of pairs for pathway names and sizes.
     comb = np.array(list(combinations(pathways, 2)))
     combnames = np.array(list(combinations(pathways.index, 2)))
 
-    # Getting between pathway sizes by multiplying combination pairs.
-    print(comb.shape)
-    size = comb[:,0]*comb[:,1]
+    WPMind = []
+    for column in snpmat:
+        #print(snpmat[column].shape)
+        nonzeros = list(np.nonzero(snpmat[column])[0])
+        WPMind.append(nonzeros)
 
-    # Orienting bpm/wpm data and converting to dataframes.
-    bpmdata = {'path1names': combnames[:,0], 'ind1size': comb[:,0],
-            'path2names': combnames[:,1], 'ind2size': comb[:,1],'size': size}
+    BPMind = np.array(list(combinations(WPMind, 2)))
+
+    # Getting between pathway sizes by multiplying combination available pairs.
+    if (len(pathways) > 1):
+        size = comb[:,0]*comb[:,1]
+        # Orienting bpm/wpm data and converting to dataframes.
+        bpmdata = {'path1names': combnames[:,0], 'ind1size': comb[:,0], 'ind1': BPMind[:,0],
+                'path2names': combnames[:,1], 'ind2size': comb[:,1], 'ind2': BPMind[:,1],
+                'size': size}
+
+    else:
+        bpmdata = {'path1names': [], 'ind1size': [],
+                'path2names': [], 'ind2size': [],'size': []}
+
     bpm = pd.DataFrame(bpmdata)
 
-    wpmdata = {'names': pathways.index, 'indsize': pathways.values,
+    wpmdata = {'pathway': pathways.index, 'indsize': pathways.values, 'ind': WPMind,
                 'size': (pathways.values*pathways.values)-pathways.values}
     wpm = pd.DataFrame(wpmdata)
 

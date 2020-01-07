@@ -22,7 +22,7 @@ def imputesnp(data):
 
         # Replace -1s (missing values) with most frequent value. (0, 1, or 2)
         gen = np.argmax([sum0, sum1, sum2])
-        data[column] = data[column].replace(to_replace=(-1), value=gen)
+        data.loc[column] = data[column].replace(to_replace=(-1), value=gen)
 
     # Returns imputed data.
     return data
