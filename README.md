@@ -12,3 +12,13 @@ Options:
 Example:
 `python3 bridge.py --job=DataProcess --plinkFile=data/gwas_data_final`
 
+## Compute Interaction network
+To run:
+`python3 bridge.py --job=ComputeInteraction --options`
+
+Options:
+--model = model, RR - RD - DD - combined
+--nWorker = number of parallel workers
+--samplePerms = number of sample permuations
+Example:
+`python3 bridge.py --job=ComputeInteraction --model=RR --nWorker=6 --samplePerms=10`

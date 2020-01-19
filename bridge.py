@@ -6,6 +6,7 @@ from datatools import msigdb2pkl as msig2p
 from datatools import mapsnp2gene as snp2gene
 from datatools import snppathway as snpp
 from datatools import bpmind as bpm
+from corefuns import matrix_operations_par as ci
 
 ## main caller of bridge
 
@@ -23,6 +24,10 @@ if __name__ == '__main__':
 	mappingDistance = 5000
 	minPath = 10
 	maxPath = 300
+	alpha1 = 0.05
+	alpha2 = 0.05
+	n_workers = 1
+	sample_perms = 1
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
 			o = arg.split('=')[0]
@@ -41,6 +46,12 @@ if __name__ == '__main__':
 				maxPath = int(a)
 			elif o == '--minPath':
 				minPath = int(a)
+			elif o == '--model':
+				model = a
+			elif o == '--nWorker':
+				n_workers = int(a)
+			elif o == '--samplePerms':
+				sample_perms = int(a)
 
 
 
@@ -80,6 +91,21 @@ if __name__ == '__main__':
 		geneset_pkl = genesets + '.pkl' 
 		outfile = snpp.snppathway(finalfile, sgmfile, geneset_pkl, minPath, maxPath)
 		bpm.bpmind(outfile)
+	elif job == 'ComputeInteraction':
+		## compute interaction network here
+		## input parameters
+		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
+			sys.exit('wrong model')
+		if not path.exists('data/SNPdataAD.pkl'):
+			sys.exit('data/SNPdataAD.pkl not found')
+		if not path.exists('data/SNPdataAR.pkl'):
+			sys.exit('data/SNPdataAR.pkl not found')
+		if model == 'combined':
+			## combined model process here
+			return
+		else:
+			for R in range(sample_perms+1):
+				ci.run(model,alpha1,alpha2,n_workers,R)
 
 
 
