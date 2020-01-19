@@ -102,7 +102,7 @@ if __name__ == '__main__':
 			sys.exit('data/SNPdataAR.pkl not found')
 		if model == 'combined':
 			## combined model process here
-			return
+			sys.exit('test')
 		else:
 			for R in range(sample_perms+1):
 				ci.run(model,alpha1,alpha2,n_workers,R)
