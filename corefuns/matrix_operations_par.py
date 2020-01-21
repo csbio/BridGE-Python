@@ -212,7 +212,7 @@ def parallel_run(job_arg):
 def run(model,alpha1,alpha2,n_workers,R):
 
 	## output name
-	output_name = 'data/ssM_hygessi_'+ str(R) + '.pkl'
+	output_name = 'data/ssM_hygessi_'+ model+'_R'+str(R) + '.pkl'
 	
 	pkl_d = open('data/SNPdataAD.pkl','rb')
 	pkl_r = open('data/SNPdataAR.pkl','rb')
@@ -319,13 +319,36 @@ def run(model,alpha1,alpha2,n_workers,R):
 	final.close()
 
 
+def combine(alpha1,alpha2,n_workers,R):
+	output_name = 'data/ssM_hygessi_'+ 'combined_R'+str(R) + '.pkl'
+	## run for 3 models
+	self.run('RR',alpha1,alpha2,n_workers,R)
+	self.run('RD',alpha1,alpha2,n_workers,R)
+	self.run('DD',alpha1,alpha2,n_workers,R)
 
+	## load results for 3 models
+	rr_file = 'data/ssM_hygessi_'+ 'RR_R'+str(R) + '.pkl'
+	rd_file = 'data/ssM_hygessi_'+ 'RD_R'+str(R) + '.pkl'
+	dd_file = 'data/ssM_hygessi_'+ 'DD_R'+str(R) + '.pkl'
+	pklin = open(rr_file,'rb')
+	rr_network = pickle.load(pklin)
+	pklin.close()
+	pklin = open(rd_file,'rb')
+	rd_network = pickle.load(pklin)
+	pklin.close()
+	pklin = open(dd_file,'rb')
+	dd_network = pickle.load(pklin)
+	pklin.close()
 
+	## compare netowrks, take the element-wise max
+	risk_max_temp = numpy.maximum(rr_network.risk,dd_network.risk)
+	risk_max = numpy.maximum(risk_max_temp,rd_network.risk)
 
+	protective_max_temp = numpy.maximum(rr_network.protective,dd_network.protective)
+	protective_max = numpy.maximum(protective_max_temp,rd_network.protective)
 
-
-
-
-
-
-
+	## save in the pickle format
+	network = InteractionNetwork.InteractionNetwork(risk_max,protective_max)
+	final = open(output_name, 'wb')
+	pickle.dump(network, final)
+	final.close()
