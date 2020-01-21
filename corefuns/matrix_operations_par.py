@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.io import loadmat
 from scipy.stats import hypergeom
 from scipy.io import loadmat,savemat
-from corefuns import HygeCache
+from corefuns import HygeCache as hc
 import multiprocessing as mp
 import sys
 import pickle
@@ -75,6 +75,11 @@ def parallel_run(job_arg):
 	pheno_res = numpy.ones(pheno.shape) - pheno
 	s = sy.shape[1]
 
+
+	## reshaping pheno
+	pheno = numpy.reshape(pheno,(pheno.shape[0],1))
+	pheno_res = numpy.reshape(pheno_res,(pheno_res.shape[0],1))
+
 	# pairwise
 	### P11
 	#### Risk
@@ -139,7 +144,7 @@ def parallel_run(job_arg):
 	xp10 = matrix_to_array(xp10,i1,symmetric_flag)
 
 
-	cache = HygeCache(job_arg.population_size,job_arg.case_size,job_arg.control_size)
+	cache = hc.HygeCache(job_arg.population_size,job_arg.case_size,job_arg.control_size)
 
 	## for risk associated
 	p11 = cache.apply_hyge(g11,x11,job_arg.case_flag)
@@ -207,7 +212,7 @@ def parallel_run(job_arg):
 def run(model,alpha1,alpha2,n_workers,R):
 
 	## output name
-	output_name = 'ssM_hygessi_'+ str(R) + '.pkl'
+	output_name = 'data/ssM_hygessi_'+ str(R) + '.pkl'
 	
 	pkl_d = open('data/SNPdataAD.pkl','rb')
 	pkl_r = open('data/SNPdataAR.pkl','rb')
@@ -220,9 +225,7 @@ def run(model,alpha1,alpha2,n_workers,R):
 	pheno = snpdata_r.pheno.values.astype(int)
 	dataR = snpdata_r.data.values.astype(int)
 	dataD = snpdata_d.data.values.astype(int)
-	print(pheno.shape)
-	print(dataR.shape)
-	print(dataD.shape)
+
 
 
 	if model == 'RR':
@@ -308,7 +311,7 @@ def run(model,alpha1,alpha2,n_workers,R):
 		i_upper = numpy.triu_indices(s, -1)
 		result_risk[i_upper] = result_risk.T[i_upper]
 		result_protective[i_upper] = result_protective.T[i_upper]
-	network = InteractionNetwork(result_risk,result_protective)
+	network = InteractionNetwork.InteractionNetwork(result_risk,result_protective)
 
 	# Save data to pickle file.
 	final = open(output_name, 'wb')

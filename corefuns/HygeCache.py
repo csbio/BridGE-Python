@@ -1,7 +1,7 @@
 import numpy
 import math
 import pandas as pd
-from corefuns import hygetest
+from corefuns import hygetest as ht
 
 class HygeCache:
 	def __init__(self,sample_size,case_size,control_size):
@@ -13,9 +13,9 @@ class HygeCache:
 		# input_row is : genotype_size,x
 		# x is the number of phenotypes which have the genotype
 		if case_flag:
-			return hygetest(self.sample_size,self.case_size,input_row[1],input_row[0])
+			return ht.hygetest(self.sample_size,self.case_size,input_row[1],input_row[0])
 		else:
-			return hygetest(self.sample_size,self.control_size,input_row[1],input_row[0])
+			return ht.hygetest(self.sample_size,self.control_size,input_row[1],input_row[0])
 
 	def call_hygetest(self,input_array,case_flag):
 		# input_array is : sample_size * genotype_size,x
