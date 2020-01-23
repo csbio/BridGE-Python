@@ -44,7 +44,7 @@ def plink2pkl(plinkRawFile,plinkBimFile,plinkFamFile,outputFile):
 
     # Structuring data to be saved into pickle format.
     SNPdata = snpc.SNPclass(data, bdf.rsid, bdf.chr, bdf.loc,
-                        fdf.pheno, fdf.fid, fdf.pid, fdf.gender)
+                        fdf.pheno-1, fdf.fid, fdf.pid, fdf.gender)
 
     # Save data to pickle file.
     final = open(outputFile, 'wb')
