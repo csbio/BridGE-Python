@@ -308,7 +308,7 @@ def run(model,alpha1,alpha2,n_workers,R):
 
 	## copy over diagonal for DD - RR
 	if model == 'RR' or model == 'DD':
-		i_upper = numpy.triu_indices(s, -1)
+		i_upper = numpy.triu_indices(s, 1)
 		result_risk[i_upper] = result_risk.T[i_upper]
 		result_protective[i_upper] = result_protective.T[i_upper]
 	network = InteractionNetwork.InteractionNetwork(result_risk,result_protective)
