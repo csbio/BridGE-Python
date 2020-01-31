@@ -17,23 +17,28 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     # Dropping the set difference of the genes in the gpmatrix and sgmatrix.
     genedroplist = list(set(geneset.gpmatrix.index).difference(set(sgm.columns)))
     sgpm = geneset.gpmatrix.drop(genedroplist, axis=0)
+    orig_order = list(sgpm.columns)
+
+    sgpm[sgpm > 1] = 1
+    # sgpm = sgpm.replace(to_replace=(2), value=1)
+    sgpm = sgpm.sort_index(axis=1)
 
     # Sum each pathway to see if we should keep it, then sorting the rows.
     pwsums = sgpm.sum()
     validpwys = pwsums[pwsums.apply(lambda x: filter_val(minPath, maxPath, x))]
     sgpm = sgpm[validpwys.index]
-    sgpm = sgpm.replace(to_replace=(2), value=1)
-    sgpm = sgpm.sort_index(axis=1)
 
     # Only keeping the columns in both the snp-gene pathway
     testm = sgm[sgpm.index]
-    testm = testm.replace(to_replace=(2), value=1)
-    testm = testm.sort_index(axis=0)
+    testm[testm > 1] = 1
+    # testm = testm.replace(to_replace=(2), value=1)
 
     # Matrix multiply dataframes to associate rsids with pathways through genes.
     final = testm.dot(sgpm)
+    final[final > 0] = 1
+    final = final.reindex(columns=orig_order)
 
-    # Summing columns of pathway to known snps and filtering those no in range.
+    # Summing columns of pathway to known snps and filtering those not in range.
     fnlsum = final.sum()
     validpwysfnl = fnlsum[fnlsum.apply(lambda x: filter_val(minPath, maxPath, x))]
     spm = final[validpwysfnl.index]
