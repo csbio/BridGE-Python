@@ -47,8 +47,9 @@ class job_result:
 def matrix_to_array(m,i,symmetric): ## takes a 2D matrix as an input, returns the lower triangle as an 1D array
 	x = m.shape[0]
 	y = m.shape[1]
+	i2 = i + x
 	if symmetric:
-		idx_low = numpy.tril_indices(x, i,y)
+		idx_low = numpy.tril_indices(x, i-1,y)
 		a = m[idx_low]
 	else:
 		a = numpy.reshape(m,(x*y))
@@ -56,9 +57,15 @@ def matrix_to_array(m,i,symmetric): ## takes a 2D matrix as an input, returns th
 
 def array_to_matrix(a,n,m,i,symmetric): ## takes a 1D array as an input(lower triangle), returns the 2D array
 	if symmetric:
-		idx = numpy.tril_indices(n, i, m)
-		matrix = numpy.zeros((n,m))
+		idx = numpy.tril_indices(n+i,-1)
+		t = i * (i-1) / 2
+		t = int(t)
+		d0 = idx[0][t:]
+		d1 = idx[1][t:]
+		idx = (d0,d1)
+		matrix = numpy.zeros((m,m))
 		matrix[idx] = a
+		matrix = matrix[i:i+n,:]
 		#matrix = numpy.maximum(matrix,matrix.transpose())
 	else:
 		matrix = numpy.reshape(a,(n,m))
@@ -98,6 +105,8 @@ def parallel_run(job_arg):
 
 	sx_res = numpy.subtract(Ix,sx)
 	sy_res = numpy.subtract(Iy,sy)
+
+
 
 	### P00
 	#### Risk
@@ -182,6 +191,7 @@ def parallel_run(job_arg):
 	p01 = cache.apply_hyge(g01,xp01,job_arg.case_flag)
 	p10 = cache.apply_hyge(g10,xp10,job_arg.case_flag)
 	p00 = cache.apply_hyge(g00,xp00,job_arg.case_flag)
+	
 	q = numpy.stack((p01,p10,p00))
 	q_min = numpy.amin(q,0)
 	raw_out = numpy.divide(p11,q_min)
