@@ -19,7 +19,7 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     sgpm = geneset.gpmatrix.drop(genedroplist, axis=0)
     orig_order = list(sgpm.columns)
 
-    # sgpm = sgpm.replace(to_replace=(2), value=1)
+    sgpm = sgpm.replace(to_replace=(2), value=1)
     sgpm = sgpm.sort_index(axis=1)
 
     # Sum each pathway to see if we should keep it, then sorting the rows.
@@ -29,7 +29,6 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
 
     # Only keeping the columns in both the snp-gene pathway
     testm = sgm[sgpm.index]
-    # testm = testm.replace(to_replace=(2), value=1)
 
     # Matrix multiply dataframes to associate rsids with pathways through genes.
     final = testm.dot(sgpm)
@@ -39,6 +38,7 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     fnlsum = final.astype(bool).sum()
     validpwysfnl = fnlsum[fnlsum.apply(lambda x: filter_val(minPath, maxPath, x))]
     spm = final[validpwysfnl.index]
+    spm = spm.replace(to_replace=(2), value=1)
     pathways = spm.astype(bool).sum()
 
     # Preparing data and filename for pickle storage.

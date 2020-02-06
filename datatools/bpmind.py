@@ -25,7 +25,7 @@ def bpmind(snpPathwayFile):
         nonzeros = list(np.nonzero(snpmat[column].to_numpy())[0])
         WPMind.append(nonzeros)
 
-    BPMind1, BPMind2 = [], []
+    BPMind1, BPMind2, ind1size, ind2size = [], [], [], []
     for i in range(len(snpmat.columns)):
         for j in range(i+1, len(snpmat.columns)):
             ind1, ind2 = [], []
@@ -34,15 +34,17 @@ def bpmind(snpPathwayFile):
                     ind1.append(k)
                 if (snpmat.iloc[k][i]!=1 and snpmat.iloc[k][j]==1):
                     ind2.append(k)
+            ind1size.append(len(ind1))
+            ind2size.append(len(ind2))
             BPMind1.append(ind1)
             BPMind2.append(ind2)
 
     # Getting between pathway sizes by multiplying combination available pairs.
     if (len(pathways) > 1):
-        size = comb[:,0]*comb[:,1]
+        size = np.array(ind1size)*np.array(ind2size)
         # Orienting bpm/wpm data and converting to dataframes.
-        bpmdata = {'path1names': combnames[:,0], 'ind1size': comb[:,0], 'ind1': BPMind1,
-                'path2names': combnames[:,1], 'ind2size': comb[:,1], 'ind2': BPMind2,
+        bpmdata = {'path1names': combnames[:,0], 'ind1size': ind1size, 'ind1': BPMind1,
+                'path2names': combnames[:,1], 'ind2size': ind2size, 'ind2': BPMind2,
                 'size': size}
 
     else:
