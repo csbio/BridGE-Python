@@ -39,6 +39,9 @@ def bpmind(snpPathwayFile):
             BPMind1.append(ind1)
             BPMind2.append(ind2)
 
+    print(len(pathways))
+
+
     # Getting between pathway sizes by multiplying combination available pairs.
     if (len(pathways) > 1):
         size = np.array(ind1size)*np.array(ind2size)

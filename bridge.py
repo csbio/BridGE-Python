@@ -12,7 +12,7 @@ from corefuns import matrix_operations_par as ci
 
 ## inputs:
 # --job : desired job
-# --plinkFile: plink file 
+# --plinkFile: plink file
 # --genesets: geneset symbolsFile and entrezFile without extension
 
 if __name__ == '__main__':
@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	plinkfile = ''
 	genesets='data/toy.genesets' ## default - #change
 	gene_annotation = 'data/glist-hg19' ## default - #change
-	mappingDistance = 5000
+	mappingDistance = 50000
 	minPath = 10
 	maxPath = 300
 	alpha1 = 0.05
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 		msig2p.msigdb2pkl(symbolsFile, entrezFile)
 		if not path.exists(gene_annotation):
 			sys.exit('gene annotation file not found')
-		sgmFile = 'snpgenemapping_' + str(int(mappingDistance/100)) + 'kb.pkl'
+		sgmFile = 'snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
 		s = '/'
 		dir_sgm = bimfile.split('/')
 		dir_sgm[-1] = sgmFile
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 		## build relationship between snps and genes
 		snp2gene.mapsnp2gene(bimfile, gene_annotation, mappingDistance, 'matrix', sgmfile) # matrix mode - #change
 		## extract snp-pathway information
-		geneset_pkl = genesets + '.pkl' 
+		geneset_pkl = genesets + '.pkl'
 		outfile = snpp.snppathway(finalfile, sgmfile, geneset_pkl, minPath, maxPath)
 		bpm.bpmind(outfile)
 	elif job == 'ComputeInteraction':
@@ -105,7 +105,3 @@ if __name__ == '__main__':
 		else:
 			for R in range(sample_perms+1):
 				ci.run(model,alpha1,alpha2,n_workers,R)
-
-
-
-
