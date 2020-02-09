@@ -87,4 +87,41 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
                     eff_bpm.append('risk')
             print(eff_bpm)
 
+
+
+        if len(ind_wpm) > 0:
+            pathway = bpm.wpm['pathway']
+            pathway = pathway.append(pathway).reset_index().drop(columns = ['index'])
+            path_wpm = pathway.iloc[ind_wpm.index]
+
+            wpm_size = bpm.wpm['size']
+            wpm_size = wpm_size.append(wpm_size).reset_index().drop(columns = ['index'])
+            wpm_size = wpm_size.iloc[ind_wpm.index]
+
+            eff_wpm = []
+            for i in range(len(ind_wpm)):
+                if ind_wpm.iloc[i].name<=len(bpm.wpm.index):
+                    eff_wpm.append('protective')
+                else:
+                    eff_wpm.append('risk')
+            print(eff_wpm)
+
+
+        if len(ind_path) > 0:
+            pathway = bpm.wpm['pathway']
+            pathway = pathway.append(pathway).reset_index().drop(columns = ['index'])
+            path_path = pathway.iloc[ind_path.index]
+
+            path_size = bpm.wpm['size']
+            path_size = path_size.append(path_size).reset_index().drop(columns = ['index'])
+            path_size = path_size.iloc[ind_path.index]
+
+            eff_path = []
+            for i in range(len(ind_path)):
+                if ind_path.iloc[i].name<=len(bpm.wpm.index):
+                    eff_path.append('protective')
+                else:
+                    eff_path.append('risk')
+            print(eff_path)
+
     return
