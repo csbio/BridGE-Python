@@ -232,9 +232,9 @@ def run(model,alpha1,alpha2,n_workers,R):
 	pkl_r.close()
 
 
-	pheno = snpdata_r.pheno.values.astype(int)
-	dataR = snpdata_r.data.values.astype(int)
-	dataD = snpdata_d.data.values.astype(int)
+	pheno = snpdata_r.pheno
+	dataR = snpdata_r.data
+	dataD = snpdata_d.data
 
 
 
@@ -296,8 +296,9 @@ def run(model,alpha1,alpha2,n_workers,R):
 			job_arg.symmetric = False
 		job_arg.i1 = idx[i]
 		job_arg.i2 = idx[i+1]
-		job_arg.sx = sx[:,job_arg.i1:job_arg.i2]
-		job_arg.sy = sy
+		print(sx.shape)
+		job_arg.sx = sx.values[:,job_arg.i1:job_arg.i2]
+		job_arg.sy = sy.values
 		job_arg.pheno = pheno
 		job_args.append(job_arg)
 
@@ -321,7 +322,7 @@ def run(model,alpha1,alpha2,n_workers,R):
 		i_upper = numpy.triu_indices(s, 1)
 		result_risk[i_upper] = result_risk.T[i_upper]
 		result_protective[i_upper] = result_protective.T[i_upper]
-	network = InteractionNetwork.InteractionNetwork(result_risk,result_protective)
+	network = InteractionNetwork.InteractionNetwork(result_risk,result_protective,None,None)
 
 	# Save data to pickle file.
 	final = open(output_name, 'wb')
@@ -332,9 +333,9 @@ def run(model,alpha1,alpha2,n_workers,R):
 def combine(alpha1,alpha2,n_workers,R):
 	output_name = 'data/ssM_hygessi_'+ 'combined_R'+str(R) + '.pkl'
 	## run for 3 models
-	self.run('RR',alpha1,alpha2,n_workers,R)
-	self.run('RD',alpha1,alpha2,n_workers,R)
-	self.run('DD',alpha1,alpha2,n_workers,R)
+	run('RR',alpha1,alpha2,n_workers,R)
+	run('RD',alpha1,alpha2,n_workers,R)
+	run('DD',alpha1,alpha2,n_workers,R)
 
 	## load results for 3 models
 	rr_file = 'data/ssM_hygessi_'+ 'RR_R'+str(R) + '.pkl'
@@ -350,15 +351,25 @@ def combine(alpha1,alpha2,n_workers,R):
 	dd_network = pickle.load(pklin)
 	pklin.close()
 
+	s = rr_network.risk.shape[0]
+
 	## compare netowrks, take the element-wise max
+	risk_max_id = numpy.zeros((s,s))
+	risk_max_id[rr_network.risk > dd_network.risk ] = 1
+	risk_max_id[risk_max_id==0] = 2
 	risk_max_temp = numpy.maximum(rr_network.risk,dd_network.risk)
+	risk_max_id[risk_max_temp<rd_network.risk] = 3
 	risk_max = numpy.maximum(risk_max_temp,rd_network.risk)
 
+	protective_max_id = numpy.zeros((s,s))
+	protective_max_id[rr_network.protective > dd_network.protective] = 1
+	protective_max_id[protective_max_id==0] = 2
 	protective_max_temp = numpy.maximum(rr_network.protective,dd_network.protective)
+	protective_max_id[protective_max_temp<rd_network.protective] = 3
 	protective_max = numpy.maximum(protective_max_temp,rd_network.protective)
 
 	## save in the pickle format
-	network = InteractionNetwork.InteractionNetwork(risk_max,protective_max)
+	network = InteractionNetwork.InteractionNetwork(risk_max,protective_max,risk_max_id,protective_max_id)
 	final = open(output_name, 'wb')
 	pickle.dump(network, final)
 	final.close()

@@ -101,7 +101,8 @@ if __name__ == '__main__':
 		if not path.exists('data/SNPdataAR.pkl'):
 			sys.exit('data/SNPdataAR.pkl not found')
 		if model == 'combined':
-			ci.combine(alpha1,alpha2,n_workers,R)
+			for R in range(sample_perms+1):
+				ci.combine(alpha1,alpha2,n_workers,R)
 		else:
 			for R in range(sample_perms+1):
 				ci.run(model,alpha1,alpha2,n_workers,R)
