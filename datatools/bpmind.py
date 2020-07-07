@@ -22,7 +22,7 @@ def bpmind(snpPathwayFile):
 
     WPMind = []
     for column in snpmat:
-        nonzeros = list(np.nonzero(snpmat[column].to_numpy())[0])
+        nonzeros = list(np.nonzero(snpmat[column].values)[0])
         WPMind.append(nonzeros)
 
     BPMind1, BPMind2, ind1size, ind2size = [], [], [], []

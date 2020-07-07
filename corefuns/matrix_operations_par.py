@@ -124,7 +124,7 @@ def parallel_run(job_arg):
 	#### Risk
 	x10 = numpy.matmul(tempx.transpose(),sy_res)
 	#### Protective
-	xp10 = p11 = numpy.matmul(tempx_r.transpose(),sy_res)
+	xp10  = numpy.matmul(tempx_r.transpose(),sy_res)
 
 	### Genotype size for 1-0
 	g10 = numpy.matmul(sx.transpose(),sy_res)
@@ -156,10 +156,10 @@ def parallel_run(job_arg):
 	cache = hc.HygeCache(job_arg.population_size,job_arg.case_size,job_arg.control_size)
 
 	## for risk associated
-	p11 = cache.apply_hyge(g11,x11,job_arg.case_flag)
-	p01 = cache.apply_hyge(g01,x01,job_arg.case_flag)
-	p10 = cache.apply_hyge(g10,x10,job_arg.case_flag)
-	p00 = cache.apply_hyge(g00,x00,job_arg.case_flag)
+	p11 = cache.apply_hyge(g11,x11,True)
+	p01 = cache.apply_hyge(g01,x01,True)
+	p10 = cache.apply_hyge(g10,x10,True)
+	p00 = cache.apply_hyge(g00,x00,True)
 	q = numpy.stack((p01,p10,p00))
 	q_min = numpy.amin(q,0)
 
@@ -187,10 +187,10 @@ def parallel_run(job_arg):
 	result.risk = matrix
 
 	## for protective
-	p11 = cache.apply_hyge(g11,xp11,job_arg.case_flag)
-	p01 = cache.apply_hyge(g01,xp01,job_arg.case_flag)
-	p10 = cache.apply_hyge(g10,xp10,job_arg.case_flag)
-	p00 = cache.apply_hyge(g00,xp00,job_arg.case_flag)
+	p11 = cache.apply_hyge(g11,xp11,False)
+	p01 = cache.apply_hyge(g01,xp01,False)
+	p10 = cache.apply_hyge(g10,xp10,False)
+	p00 = cache.apply_hyge(g00,xp00,False)
 	
 	q = numpy.stack((p01,p10,p00))
 	q_min = numpy.amin(q,0)
@@ -322,6 +322,24 @@ def run(model,alpha1,alpha2,n_workers,R):
 		i_upper = numpy.triu_indices(s, 1)
 		result_risk[i_upper] = result_risk.T[i_upper]
 		result_protective[i_upper] = result_protective.T[i_upper]
+	else: # choose maximum, make diagonals 0
+		d = numpy.diag_indices(s)
+		i_upper = numpy.triu_indices(s, 1)
+		#i_down = numpy.tril_indices(s,-1)
+		up_risk = result_risk[i_upper]
+		down_risk = result_risk.T[i_upper]
+		up_protective = result_protective[i_upper]
+		down_protective = result_protective.T[i_upper]
+		r = numpy.stack((up_risk,down_risk))
+		p = numpy.stack((up_protective,down_protective))
+		r = numpy.amax(r,0)
+		p = numpy.amax(p,0)
+		result_risk[i_upper] = r
+		result_risk.T[i_upper] = r
+		result_risk[d] = 0
+		result_protective[i_upper] = p
+		result_protective.T[i_upper] = p
+		result_protective[d] = 0
 	network = InteractionNetwork.InteractionNetwork(result_risk,result_protective,None,None)
 
 	# Save data to pickle file.
@@ -360,6 +378,7 @@ def combine(alpha1,alpha2,n_workers,R):
 	risk_max_temp = numpy.maximum(rr_network.risk,dd_network.risk)
 	risk_max_id[risk_max_temp<rd_network.risk] = 3
 	risk_max = numpy.maximum(risk_max_temp,rd_network.risk)
+	risk_max_id[risk_max==0] = 0
 
 	protective_max_id = numpy.zeros((s,s))
 	protective_max_id[rr_network.protective > dd_network.protective] = 1
@@ -367,6 +386,7 @@ def combine(alpha1,alpha2,n_workers,R):
 	protective_max_temp = numpy.maximum(rr_network.protective,dd_network.protective)
 	protective_max_id[protective_max_temp<rd_network.protective] = 3
 	protective_max = numpy.maximum(protective_max_temp,rd_network.protective)
+	protective_max_id[protective_max==0] = 0
 
 	## save in the pickle format
 	network = InteractionNetwork.InteractionNetwork(risk_max,protective_max,risk_max_id,protective_max_id)

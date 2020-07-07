@@ -26,7 +26,7 @@ if __name__ == '__main__':
 	maxPath = 300
 	alpha1 = 0.05
 	alpha2 = 0.05
-	n_workers = 1
+	n_workers = 4
 	sample_perms = 1
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
@@ -102,6 +102,7 @@ if __name__ == '__main__':
 			sys.exit('data/SNPdataAR.pkl not found')
 		if model == 'combined':
 			for R in range(sample_perms+1):
+				print('here')
 				ci.combine(alpha1,alpha2,n_workers,R)
 		else:
 			for R in range(sample_perms+1):
