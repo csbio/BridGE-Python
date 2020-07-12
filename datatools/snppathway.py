@@ -1,4 +1,5 @@
 import pickle
+import numpy as np
 from classes import snpsetclass as snps
 
 def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
@@ -13,12 +14,10 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     pklin = open(genesets,"rb")
     geneset = pickle.load(pklin)
     pklin.close()
-
     # Dropping the set difference of the genes in the gpmatrix and sgmatrix.
     genedroplist = list(set(geneset.gpmatrix.index).difference(set(sgm.columns)))
     sgpm = geneset.gpmatrix.drop(genedroplist, axis=0)
     orig_order = list(sgpm.columns)
-
     sgpm = sgpm.replace(to_replace=(2), value=1)
     sgpm = sgpm.sort_index(axis=1)
 
@@ -26,10 +25,17 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     pwsums = sgpm.sum()
     validpwys = pwsums[pwsums.apply(lambda x: filter_val(minPath, maxPath, x))]
     sgpm = sgpm[validpwys.index]
+    
+    # sort sgm rsids based on the SNPdata
+    rsg = sgm.index.values
+    rss = SNPdata.rsid
+    rs_order = []
+    for rs in rss:
+        rs_order.append(np.where(rsg==rs)[0][0])
+    sgm = sgm.iloc[rs_order]
 
     # Only keeping the columns in both the snp-gene pathway
     testm = sgm[sgpm.index]
-
     # Matrix multiply dataframes to associate rsids with pathways through genes.
     final = testm.dot(sgpm)
     final = final.reindex(columns=orig_order)
