@@ -7,6 +7,7 @@ from datatools import mapsnp2gene as snp2gene
 from datatools import snppathway as snpp
 from datatools import bpmind as bpm
 from corefuns import matrix_operations_par as ci
+from corefuns import genstats as gs
 
 ## main caller of bridge
 
@@ -28,6 +29,8 @@ if __name__ == '__main__':
 	alpha2 = 0.05
 	n_workers = 4
 	sample_perms = 1
+	binaryNetwork = False
+	snpPerms = 100
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
 			o = arg.split('=')[0]
@@ -52,7 +55,11 @@ if __name__ == '__main__':
 				n_workers = int(a)
 			elif o == '--samplePerms':
 				sample_perms = int(a)
-
+			elif o == '--binaryNetwork':
+				if int(a) == 1:
+					binaryNetwork = True
+			elif o == '--snpPerms':
+				snpPerms = int(a)
 
 
 	## run job
@@ -102,8 +109,27 @@ if __name__ == '__main__':
 			sys.exit('data/SNPdataAR.pkl not found')
 		if model == 'combined':
 			for R in range(sample_perms+1):
-				print('here')
 				ci.combine(alpha1,alpha2,n_workers,R)
 		else:
 			for R in range(sample_perms+1):
 				ci.run(model,alpha1,alpha2,n_workers,R)
+
+	elif job == 'SamplePermutation':
+		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
+			sys.exit('wrong model')
+		bpmfile = 'data/BPMind.pkl'
+		if not path.exists(bpmfile):
+			sys.exit('data/BPMind.pkl not found')
+		if not path.exists('data/SNPdataAD.pkl'):
+                	sys.exit('data/SNPdataAD.pkl not found')
+		if not path.exists('data/SNPdataAR.pkl'):
+                	sys.exit('data/SNPdataAR.pkl not found')
+		for R in range(sample_perms+1):
+			if model == 'combined':
+				ci.combine(alpha1,alpha2,n_workers,R)
+				# build ssM file name
+				ssmfile = 'data/ssM_hygessi_combined_R'+ str(R) + '.pkl'
+			else:
+				ci.run(model,alpha1,alpha2,n_workers,R)	
+				ssmfile = 'data/ssM_hygessi_' + model + '_R'+ str(R) + '.pkl'
+			gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath)

@@ -84,8 +84,8 @@ def parallel_run(job_arg):
 
 
 	## reshaping pheno
-	pheno = numpy.reshape(pheno,(pheno.shape[0],1))
-	pheno_res = numpy.reshape(pheno_res,(pheno_res.shape[0],1))
+	pheno = numpy.reshape(pheno.values,(pheno.shape[0],1))
+	pheno_res = numpy.reshape(pheno_res.values,(pheno_res.shape[0],1))
 
 	# pairwise
 	### P11
@@ -296,7 +296,6 @@ def run(model,alpha1,alpha2,n_workers,R):
 			job_arg.symmetric = False
 		job_arg.i1 = idx[i]
 		job_arg.i2 = idx[i+1]
-		print(sx.shape)
 		job_arg.sx = sx.values[:,job_arg.i1:job_arg.i2]
 		job_arg.sy = sy.values
 		job_arg.pheno = pheno
