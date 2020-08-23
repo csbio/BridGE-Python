@@ -1,8 +1,9 @@
-import hdf5storage
 import numpy as np
 import pandas as pd
 import pickle
 from classes import fdrresultsclass as fdrr
+from classes import GenstatsOut
+from classes import Stats
 
 def fdrsampleperm(ssmFile, BPMindFile, pcut, minpath, N, genesetname=None):
 
@@ -11,60 +12,80 @@ def fdrsampleperm(ssmFile, BPMindFile, pcut, minpath, N, genesetname=None):
     pklin.close()
 
     tdf = pd.DataFrame()
+
+    ## create dataframes
+    bpmdf = pd.DataFrame()
+    bpm_pvdf = pd.DataFrame()
+    wpmdf = pd.DataFrame()
+    wpm_pvdf = pd.DataFrame()
+    pathdf = pd.DataFrame()
+    path_pvdf = pd.DataFrame()
     bpm_cols, bpm_pv_cols, wpm_cols, wpm_pv_cols, path_cols, path_pv_cols = [], [], [], [], [], []
-    bpm, bpm_pv, wpm, wpm_pv, path, path_pv = {}, {}, {}, {}, {}, {}
+
 
     for i in range(0, N+1):
         tssmFile = ssmFile.replace("_R0", "_R" + str(i))
-        genstatsfile = "data/genstats_" + tssmFile + ".mat"
-        mat = hdf5storage.loadmat(genstatsfile)
+        tssm_tmp = tssmFile.split('/')
+        tssm_tmp[-1] = 'genstats_' + tssm_tmp[-1]
+        genstatsfile = '/'.join(tssm_tmp)
 
+        ## load genstats file
+        pklin = open(genstatsfile,"rb")
+        gs = pickle.load(pklin)
+        pklin.close()
+
+        ## retrieve bpm and add to dataframe
+        bpm1 = gs.protective_stats.bpm_local
+        bpm2 = gs.risk_stats.bpm_local
+        bpm_tmp = np.concatenate((bpm1,bpm2))
         bpm_colname = "bpm"+str(i)
+        ## add bpm to dataframe
+        bpmdf[bpm_colname] = pd.Series(bpm_tmp)
+
+        ## bpm_pv
+        bpm_pv1 = gs.protective_stats.bpm_local_pv
+        bpm_pv2 = gs.risk_stats.bpm_local_pv
+        bpm_pv_tmp = np.concatenate((bpm_pv1,bpm_pv2))
         bpm_pv_colname = "bpm_pv"+str(i)
+        bpm_pvdf[bpm_pv_colname] = pd.Series(bpm_pv_tmp)
+
+        ## wpm
+        wpm1 = gs.protective_stats.wpm_local
+        wpm2 = gs.risk_stats.wpm_local
+        wpm_tmp = np.concatenate((wpm1,wpm2))
         wpm_colname = "wpm"+str(i)
+        wpmdf[wpm_colname] = pd.Series(wpm_tmp)
+
+        ## wpm_pv
+        wpm_pv1 = gs.protective_stats.wpm_local_pv
+        wpm_pv2 = gs.risk_stats.wpm_local_pv
+        wpm_pv_tmp = np.concatenate((wpm_pv1,wpm_pv2))
         wpm_pv_colname = "wpm_pv"+str(i)
+        wpm_pvdf[wpm_pv_colname] = pd.Series(wpm_pv_tmp)
+
+        ## path
+        path1 = gs.protective_stats.path_degree
+        path2 = gs.risk_stats.path_degree
+        path_tmp = np.concatenate((path1,path2))
         path_colname = "path"+str(i)
+        pathdf[path_colname] = pd.Series(path_tmp)
+
+        ## path_pv
+        path_pv1 = gs.protective_stats.path_degree_pv
+        path_pv2 = gs.risk_stats.path_degree_pv
+        path_pv_tmp = np.concatenate((path_pv1,path_pv2))
         path_pv_colname = "path_pv"+str(i)
+        path_pvdf[path_pv_colname] = pd.Series(path_pv_tmp)
 
-        bpm.update({bpm_colname:(list(mat['bpm_local'][0][0][0]) + list(mat['bpm_local'][0][1][0]))})
+        ## update column names
         bpm_cols.append(bpm_colname)
-
-        bpm_pv.update({bpm_pv_colname:(list(mat['bpm_local_pv'][0][0][0]) + list(mat['bpm_local_pv'][0][1][0]))})
         bpm_pv_cols.append(bpm_pv_colname)
-
-        wpm.update({wpm_colname:(list(mat['wpm_local'][0][0][0]) + list(mat['wpm_local'][0][1][0]))})
         wpm_cols.append(wpm_colname)
-
-        wpm_pv.update({wpm_pv_colname:(list(mat['wpm_local_pv'][0][0][0]) + list(mat['wpm_local_pv'][0][1][0]))})
         wpm_pv_cols.append(wpm_pv_colname)
-
-        path.update({path_colname:(list(mat['path_degree'][0][0][0]) + list(mat['path_degree'][0][1][0]))})
         path_cols.append(path_colname)
-
-        path_pv.update({path_pv_colname:(list(mat['path_degree_pv'][0][0][0]) + list(mat['path_degree_pv'][0][1][0]))})
         path_pv_cols.append(path_pv_colname)
 
-        # print(bpmf.bpm)
-        # print(bpmf.bpm.keys())
-        # print(bpmf.wpm)
-        # print(bpmf.bpm)
 
-        tdf = tdf.append(bpmf.bpm)
-
-    # bpm_cols, bpm_pv_cols
-
-    bpmdf = pd.DataFrame(bpm)
-    bpm_pvdf = pd.DataFrame(bpm_pv)
-    wpmdf = pd.DataFrame(wpm)
-    wpm_pvdf = pd.DataFrame(wpm_pv)
-    pathdf = pd.DataFrame(path)
-    path_pvdf = pd.DataFrame(path_pv)
-    # print(bpmdf)
-    # print(bpm_pvdf)
-    # print(wpmdf)
-    # print(wpm_pvdf)
-    # print(pathdf)
-    # print(path_pvdf)
 
     fdf = pd.concat([bpmf.bpm, bpmdf, bpm_pvdf],axis=1)
     fdf.loc[((fdf['ind1size'] < minpath) | (fdf['ind2size'] < minpath)), bpm_cols] = 0
@@ -113,7 +134,9 @@ def fdrsampleperm(ssmFile, BPMindFile, pcut, minpath, N, genesetname=None):
     # print(wpm_pv)
     # print(path_pv)
 
-    outfilename = "data/results_" + ssmFile + ".pkl"
+    ssm_tmp = ssmFile.split('/')
+    ssm_tmp[-1] = 'results_' + ssm_tmp[-1]
+    outfilename = '/'.join(ssm_tmp)
     save_obj = fdrr.fdrrclass(bpm_pv, wpm_pv, path_pv, bpm_ranksum, wpm_ranksum,
         path_ranksum, fdrBPM1, fdrBPM2, fdrWPM1, fdrWPM2, fdrPATH1, fdrPATH2)
 
@@ -219,7 +242,7 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
     # print(testM)
 
     for i in range(len(testM)):
-        testM[i][1] = min(x[1] for x in testM[0:i+1])
+        testM[i][2] = min(x[2] for x in testM[0:i+1])
 
     # assign FDR to BPMs
     for i in range(len(testM)):
@@ -227,7 +250,7 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
         # print(rfdr1.loc[testM[i][0]])
         rfdr1.loc[testM[i][0]] = testM[i][2]
 
-    if (type == 'path'):
+    if not (type == 'bpm'):
         testM = list(map(list, zip(vrows, valid_pvs, list(fdr2), vpv1)))
     else:
         testM = list(map(list, zip(vrows, valid_pvs, list(fdr2), [round(x) for x in vpv1])))
@@ -236,7 +259,7 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
     # print(testM)
 
     for i in range(len(testM)):
-        testM[i][1] = min(x[1] for x in testM[0:i+1])
+        testM[i][2] = min(x[2] for x in testM[0:i+1])
 
     # assign FDR to BPMs
     for i in range(len(testM)):
@@ -248,3 +271,13 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
     # print(rfdr2)
 
     return rfdr1, rfdr2
+
+
+
+# testing
+#ssmFile = 'ssM_hygessi_combined_R0.pkl'
+#bpmfile = 'data/BPMind.pkl'
+#pcut = 0.05
+#minPath = 10
+#N = 3
+#fdrsampleperm(ssmFile, bpmfile, pcut, minPath, N)

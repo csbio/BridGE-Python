@@ -8,6 +8,7 @@ from datatools import snppathway as snpp
 from datatools import bpmind as bpm
 from corefuns import matrix_operations_par as ci
 from corefuns import genstats as gs
+from corefuns import fdrsampleperm as fdr
 
 ## main caller of bridge
 
@@ -31,6 +32,7 @@ if __name__ == '__main__':
 	sample_perms = 1
 	binaryNetwork = False
 	snpPerms = 100
+	pval_cutoff = 0.05
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
 			o = arg.split('=')[0]
@@ -60,6 +62,8 @@ if __name__ == '__main__':
 					binaryNetwork = True
 			elif o == '--snpPerms':
 				snpPerms = int(a)
+			elif o == '--pvalueCutoff':
+				pval_cutoff = float(a)
 
 
 	## run job
@@ -133,3 +137,15 @@ if __name__ == '__main__':
 				ci.run(model,alpha1,alpha2,n_workers,R)	
 				ssmfile = 'data/ssM_hygessi_' + model + '_R'+ str(R) + '.pkl'
 			gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath)
+
+	elif job == 'Analysis':
+		bpmfile = 'data/BPMind.pkl'
+		if not path.exists(bpmfile):
+			sys.exit('data/BPMind.pkl not found')
+		if model == 'combined':
+			ssmfile = 'data/ssM_hygessi_combined_R0.pkl'
+		else:
+			ssmfile = 'data/ssM_hygessi_' + model + '_R0.pkl'
+		if not path.exists(ssmfile):
+			sys.exit(ssmfile+' not found')
+		fdr.fdrsampleperm(ssmfile, bpmfile, pval_cutoff, minPath, sample_perms)
