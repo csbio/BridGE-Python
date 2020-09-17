@@ -32,12 +32,12 @@ def plink2pkl(plinkRawFile,plinkBimFile,plinkFamFile,outputFile):
 
     # Creating headers for columns reading files into dataframes.
     bimHeader = ['chr', 'rsid', 'tmp1', 'loc', 'tmp2', 'tmp3']
-    bdf = pd.read_csv(plinkBimFile, sep=r"\s*", names=bimHeader, engine='python')
+    bdf = pd.read_csv(plinkBimFile, sep=r"\s+", names=bimHeader, engine='python')
 
     famHeader = ['fid', 'pid', 'tmp1', 'tmp2', 'gender', 'pheno']
-    fdf = pd.read_csv(plinkFamFile, sep=r"\s*", names=famHeader, engine='python')
+    fdf = pd.read_csv(plinkFamFile, sep=r"\s+", names=famHeader, engine='python')
 
-    rdf = pd.read_csv(plinkRawFile, sep=r"\s*", header=0, engine='python')
+    rdf = pd.read_csv(plinkRawFile, sep=r"\s+", header=0, engine='python')
 
     # Imputing missing values from raw file dataframe.
     data = isnp.imputesnp(rdf[rdf.columns[6:]])

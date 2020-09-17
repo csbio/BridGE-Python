@@ -17,8 +17,8 @@ import math
 
 def msigdb2pkl(symbolsFile, entrezFile):
     # Reading files into dataframes.
-    sdf = pd.read_csv(symbolsFile, sep=r"\s*", header=None, engine='python')
-    edf = pd.read_csv(entrezFile, sep=r"\s*", header=None, engine='python')
+    sdf = pd.read_csv(symbolsFile, sep=r"\s+", header=None, engine='python')
+    edf = pd.read_csv(entrezFile, sep=r"\s+", header=None, engine='python')
 
     # Accumulator list, symbol list, and entrezID list
     acclist, symlist, idlist = [], [], []

@@ -242,7 +242,7 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
     # print(testM)
 
     for i in range(len(testM)):
-        testM[i][2] = min(x[2] for x in testM[0:i+1])
+        testM[i][2] = min(x[1] for x in testM[0:i+1])
 
     # assign FDR to BPMs
     for i in range(len(testM)):
@@ -259,7 +259,7 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
     # print(testM)
 
     for i in range(len(testM)):
-        testM[i][2] = min(x[2] for x in testM[0:i+1])
+        testM[i][2] = min(x[1] for x in testM[0:i+1])
 
     # assign FDR to BPMs
     for i in range(len(testM)):

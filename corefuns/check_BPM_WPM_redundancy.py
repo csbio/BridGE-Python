@@ -23,13 +23,13 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
         nnz = (ind<=len(bpmind.bpm['size'])).sum()
 
         ind1 = ind[0:nnz]
-        ind2 = ind[nnz+1:]
+        ind2 = ind[nnz:] - len(bpmind.bpm['size'])
 
         ind = np.array(fdrWPM[fdrWPM<=fdrcut].dropna().index)
         nnz = (ind<=len(bpmind.wpm['size'])).sum()
 
         ind3 = ind[0:nnz]
-        ind4 = ind[nnz+1:]
+        ind4 = ind[nnz:] - len(bpmind.wpm['size'])
         #
         # ind1.rename(columns={"bpm2": "ind1"}, inplace = True)
         # ind2.rename(columns={"bpm2": "ind2"}, inplace = True)
@@ -40,10 +40,9 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
         # Should ind have more than one row
         if len(ind1) > 1:
-            bpm_ind1_ind1 = bpmind.bpm['ind1'].iloc[(ind1)%15]
-            bpm_ind2_ind1 = bpmind.bpm['ind2'].iloc[(ind1)%15]
+            bpm_ind1_ind1 = bpmind.bpm['ind1'].iloc[ind1]
+            bpm_ind2_ind1 = bpmind.bpm['ind2'].iloc[ind1]
 
-            # TODO: bpmsim incomplete
             BPM_sim[0] = bpmsim.bpmsim(bpm_ind1_ind1, bpm_ind2_ind1, bpm_ind1_ind1, bpm_ind2_ind1)
 
             TTT = (BPM_sim[0]>=0.25).astype(int)
@@ -60,19 +59,18 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
         # Should ind have more than one row
         if len(ind2) > 1:
-            bpm_ind1_ind2 = bpmind.bpm['ind1'].iloc[(ind2)%15]
-            bpm_ind2_ind2 = bpmind.bpm['ind2'].iloc[(ind2)%15]
+            bpm_ind1_ind2 = bpmind.bpm['ind1'].iloc[ind2]
+            bpm_ind2_ind2 = bpmind.bpm['ind2'].iloc[ind2]
             # print('====  bpm_ind1_ind2 ====')
             # print('====  bpm_ind2_ind2 ====')
             # print(bpm_ind1_ind2)
             # print(bpm_ind2_ind2)
             # input()
 
-            # TODO: bpmsim incomplete
             BPM_sim[1] = bpmsim.bpmsim(bpm_ind1_ind2, bpm_ind2_ind2, bpm_ind1_ind2, bpm_ind2_ind2)
 
-            TTT = (BPM_sim[0]>=0.25).astype(int)
-            noRD[0], group[0] = sparse.csgraph.connected_components(TTT)
+            TTT = (BPM_sim[1]>=0.25).astype(int)
+            noRD[1], group[1] = sparse.csgraph.connected_components(TTT)
             b0=len(list(set(group[1])))
 
 
@@ -86,16 +84,15 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
         # Should ind have more than one row
         if len(ind3) > 1:
-            wpm_ind_ind3 = bpmind.wpm['ind'].iloc[(ind3)%6]
+            wpm_ind_ind3 = bpmind.wpm['ind'].iloc[ind]
             # print('====  wpm_ind_ind3 ====')
             # print(wpm_ind_ind3)
             # input()
 
-            # TODO: bpmsim incomplete
             BPM_sim[2] = bpmsim.bpmsim(wpm_ind_ind3, wpm_ind_ind3, wpm_ind_ind3, wpm_ind_ind3)
 
-            TTT = (BPM_sim[0]>=0.25).astype(int)
-            noRD[0], group[0] = sparse.csgraph.connected_components(TTT)
+            TTT = (BPM_sim[2]>=0.25).astype(int)
+            noRD[2], group[2] = sparse.csgraph.connected_components(TTT)
             c0=len(list(set(group[2])))
 
 
@@ -109,16 +106,15 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
         # Should ind have more than one row
         if len(ind4) > 1:
-            wpm_ind_ind4 = bpmind.wpm['ind'].iloc[(ind4)%6]
+            wpm_ind_ind4 = bpmind.wpm['ind'].iloc[ind4]
             # print('====  wpm_ind_ind4 ====')
             # print(wpm_ind_ind4)
             # input()
 
-            # TODO: bpmsim incomplete
             BPM_sim[3] = bpmsim.bpmsim(wpm_ind_ind4, wpm_ind_ind4, wpm_ind_ind4, wpm_ind_ind4)
 
-            TTT = (BPM_sim[0]>=0.25).astype(int)
-            noRD[0], group[0] = sparse.csgraph.connected_components(TTT)
+            TTT = (BPM_sim[3]>=0.25).astype(int)
+            noRD[3], group[3] = sparse.csgraph.connected_components(TTT)
             d0=len(list(set(group[3])))
 
 
@@ -156,13 +152,13 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
         nnz = (ind<=len(bpmind.wpm['size'])).sum()
 
         ind1 = ind[0:nnz]
-        ind2 = ind[nnz+1:]
+        ind2 = ind[nnz:] - len(bpmind.wpm['size'])
 
         group, PATH_sim, noRD = [0]*2, [0]*2, [0]*2
 
         # Should ind have more than one row
         if len(ind1) > 1:
-            wpm_ind_ind1 = bpmind.wpm['ind'].iloc[(ind1)%6]
+            wpm_ind_ind1 = bpmind.wpm['ind'].iloc[ind1]
 
             PATH_sim[0] = pathsim.pathsim(wpm_ind_ind1)
             TTT = (PATH_sim[0]>=0.25).astype(int)
@@ -179,7 +175,7 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
         # Should ind have more than one row
         if len(ind2) > 1:
-            wpm_ind_ind2 = bpmind.wpm['ind'].iloc[(ind2.index)%6]
+            wpm_ind_ind2 = bpmind.wpm['ind'].iloc[ind2]
 
             PATH_sim[1] = pathsim.pathsim(wpm_ind_ind2)
             TTT = (PATH_sim[1]>=0.25).astype(int)

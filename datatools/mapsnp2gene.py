@@ -6,12 +6,12 @@ def mapsnp2gene(snpAnnotation, geneAnnotation, mappingDistance, option, outfile)
 
     # Creating SNP dataframe from snp annotation file.
     snph = ['chromo', 'snprs', 'tmp1', 'snploc', 'tmp2', 'tmp3']
-    sdf = pd.read_csv(snpAnnotation, sep=r"\s*", names=snph, engine='python')
+    sdf = pd.read_csv(snpAnnotation, sep=r"\s+", names=snph, engine='python')
     sdf['chromo'] = pd.to_numeric(sdf['chromo'])
 
     # Creating gene dataframe from gene annotation file.
     geneh = ['chromo', 'geneloc1', 'geneloc2', 'genes']
-    gdf = pd.read_csv(geneAnnotation, sep=r"\s*", names=geneh, engine='python')
+    gdf = pd.read_csv(geneAnnotation, sep=r"\s+", names=geneh, engine='python')
     gdf = gdf[gdf.chromo.apply(lambda x: x.isnumeric())]
     gdf['chromo'] = pd.to_numeric(gdf['chromo'])
     gdf.sort_values(by='chromo', inplace=True)

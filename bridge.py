@@ -9,6 +9,7 @@ from datatools import bpmind as bpm
 from corefuns import matrix_operations_par as ci
 from corefuns import genstats as gs
 from corefuns import fdrsampleperm as fdr
+from corefuns import collectresults as clr
 
 ## main caller of bridge
 
@@ -33,6 +34,7 @@ if __name__ == '__main__':
 	binaryNetwork = False
 	snpPerms = 100
 	pval_cutoff = 0.05
+	fdrcut = 0.4
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
 			o = arg.split('=')[0]
@@ -64,6 +66,8 @@ if __name__ == '__main__':
 				snpPerms = int(a)
 			elif o == '--pvalueCutoff':
 				pval_cutoff = float(a)
+			elif o == '--fdrCutoff':
+				fdrcut = flot(a)
 
 
 	## run job
@@ -149,3 +153,13 @@ if __name__ == '__main__':
 		if not path.exists(ssmfile):
 			sys.exit(ssmfile+' not found')
 		fdr.fdrsampleperm(ssmfile, bpmfile, pval_cutoff, minPath, sample_perms)
+		sgmFile = 'data/snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
+		snppathwayfile = 'data/snp_pathway_min'+str(minPath)+'_max'+str(maxPath)+'.pkl'
+		if not path.exists(sgmFile):
+			sys.exit('snp_gene mapping not found')
+		if not path.exists(snppathwayfile):
+			sys.exit('snp_pathway mapping not found')
+		ssm_tmp = ssmfile.split('/')
+		ssm_tmp[-1] = 'results_' + ssm_tmp[-1]
+		resultsfile = '/'.join(ssm_tmp)
+		clr.collectresults(resultsfile,fdrcut,ssmfile,bpmfile,snppathwayfile,sgmFile)

@@ -21,6 +21,12 @@ def bpmsim(BPMind1x, BPMind2x, BPMind1y, BPMind2y):
         BPMind1y = cellsquareform(BPMind1y)
         BPMind2y = cellsquareform(BPMind2y)
 
+    result_shape = BPMind1x.shape
+    BPMind1x = BPMind1x.flatten()
+    BPMind2x = BPMind2x.flatten()
+    BPMind1y = BPMind1y.flatten()
+    BPMind2y = BPMind2y.flatten()
+
     mm = list(map(lambda x,y,z,r : min(len(x)*len(y),len(z)*len(r)),BPMind1x,BPMind2x,BPMind1y,BPMind2y))
 
     ind1 = list(map(lambda x,y : list(set(x) & set(y)), BPMind1x,BPMind1y))
@@ -33,9 +39,10 @@ def bpmsim(BPMind1x, BPMind2x, BPMind1y, BPMind2y):
     ind2 = list(map(lambda x,y : list(set(x) & set(y)), BPMind2x,BPMind1y))
 
     simtmp2 = list(map(lambda x,y : len(x)*len(y), ind1,ind2))
-    simtmp2 = np.divide(simtmp1, mm)
+    simtmp2 = np.divide(simtmp2, mm)
     
     sim = np.maximum(simtmp1,simtmp2)
+    sim = np.reshape(sim,result_shape)
 
     if test:
         sim = squareform(sim)
