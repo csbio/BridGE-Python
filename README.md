@@ -9,6 +9,11 @@ To run:
 
 Options:
 --plinkFile = path to plink input file without extention. 
+--geneAnnotation = path to gene annotation file
+--genesets = path to geneset reference
+--mappingDistance = SNP to Gene mapping distance(in bp)
+--maxPath = maximum number of SNPs in a pathway
+--minPath = Minimum number of SNPs in a pathway
 Example:
 `python3 bridge.py --job=DataProcess --plinkFile=data/gwas_data_final`
 
