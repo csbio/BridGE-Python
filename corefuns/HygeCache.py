@@ -8,6 +8,7 @@ class HygeCache:
 		self.sample_size = sample_size
 		self.case_size =  case_size
 		self.control_size = control_size
+		#self.cache = memoize(ht.hygetest)
 
 	def hygetest_caller(self,input_row,case_flag):
 		# input_row is : genotype_size,x

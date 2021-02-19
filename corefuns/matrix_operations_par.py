@@ -1,4 +1,5 @@
 import numpy
+import time
 import math
 import pandas as pd
 from scipy.io import loadmat
@@ -6,6 +7,7 @@ from scipy.stats import hypergeom
 from scipy.io import loadmat,savemat
 from corefuns import HygeCache as hc
 import multiprocessing as mp
+from multiprocessing import sharedctypes
 import sys
 import pickle
 from classes import snpsetclass as snps
@@ -14,11 +16,19 @@ from classes import InteractionNetwork
 
 # input arguments: model,alpha1,alpha2,plink-cluster file, nworkers,R
 
+def print_time(o):
+	print(o)
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 
 
 
 class job_quota:
 	def __init__(self,population_size,case_size,control_size):
+		print('creating job quota')
+		sys.stdout.flush()
 		self.population_size = population_size
 		self.case_size = case_size
 		self.control_size = control_size
@@ -31,6 +41,8 @@ class job_quota:
 		self.case_flag = True
 		self.alpha1 = 0
 		self.alpha2 = 0
+		self.shared_risk = None
+		self.shared_protective = None
 
 class job_result:
 	def __init__(self):
@@ -42,6 +54,11 @@ class job_result:
 		self.protective = None
 
 
+def init_worker(r,p):
+	global shared_risk_c
+	shared_risk_c = r
+	global shared_protective_c
+	shared_protective_c = p
 
 
 def matrix_to_array(m,i,symmetric): ## takes a 2D matrix as an input, returns the lower triangle as an 1D array
@@ -72,6 +89,7 @@ def array_to_matrix(a,n,m,i,symmetric): ## takes a 1D array as an input(lower tr
 	return matrix
 
 def parallel_run(job_arg):
+	sys.stdout.flush()
 	# sub-matrix sx, sub-matrix sy, pheno
 	pheno = job_arg.pheno
 	sx = job_arg.sx
@@ -81,7 +99,17 @@ def parallel_run(job_arg):
 	symmetric_flag = job_arg.symmetric
 	pheno_res = numpy.ones(pheno.shape) - pheno
 	s = sy.shape[1]
-
+	shared_risk = numpy.ctypeslib.as_array(shared_risk_c)
+	shared_protective = numpy.ctypeslib.as_array(shared_protective_c)
+	print('in the parallel run:')
+	print('i1 = '+str(i1)+' , i2 = '+str(i2))
+	print('i1 = '+str(i1)+ ' creating matrices')
+	print(shared_risk.shape)
+	print(shared_protective.shape)
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()	
 
 	## reshaping pheno
 	pheno = numpy.reshape(pheno.values,(pheno.shape[0],1))
@@ -106,7 +134,11 @@ def parallel_run(job_arg):
 	sx_res = numpy.subtract(Ix,sx)
 	sy_res = numpy.subtract(Iy,sy)
 
-
+	print('i1= '+str(i1)+' starting p computation')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 
 	### P00
 	#### Risk
@@ -119,6 +151,12 @@ def parallel_run(job_arg):
 	### Genotype size for 0-0
 	g00 = numpy.matmul(sx_res.transpose(),sy_res)
 
+	print('i1= '+str(i1)+' p00 computed')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
+
 
 	### P10
 	#### Risk
@@ -129,6 +167,11 @@ def parallel_run(job_arg):
 	### Genotype size for 1-0
 	g10 = numpy.matmul(sx.transpose(),sy_res)
 
+	print('i1= '+str(i1)+' p10 computed')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 
 	### P01
 	#### Risk
@@ -138,6 +181,12 @@ def parallel_run(job_arg):
 
 	### Genotype size for 0-1
 	g01 = numpy.matmul(sx_res.transpose(),sy)
+
+	print('i1= '+str(i1)+' p01 computed')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 
 	g11 = matrix_to_array(g11,i1,symmetric_flag)
 	g10 = matrix_to_array(g10,i1,symmetric_flag)
@@ -151,18 +200,37 @@ def parallel_run(job_arg):
 	xp11 = matrix_to_array(xp11,i1,symmetric_flag)
 	xp01 = matrix_to_array(xp01,i1,symmetric_flag)
 	xp10 = matrix_to_array(xp10,i1,symmetric_flag)
-
+	
+	print('i1= '+str(i1)+' creating cache')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 
 	cache = hc.HygeCache(job_arg.population_size,job_arg.case_size,job_arg.control_size)
 
+	print('i1 = '+str(i1)+ ' calling hyge for risk')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 	## for risk associated
 	p11 = cache.apply_hyge(g11,x11,True)
 	p01 = cache.apply_hyge(g01,x01,True)
 	p10 = cache.apply_hyge(g10,x10,True)
 	p00 = cache.apply_hyge(g00,x00,True)
+	del x11
+	del x01
+	del x10
+	del x00
 	q = numpy.stack((p01,p10,p00))
 	q_min = numpy.amin(q,0)
 
+	print('i1 = '+str(i1)+ ' final computation')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 	raw_out = numpy.divide(p11,q_min)
 	log_out = numpy.log10(raw_out)
 	log_out = numpy.multiply(log_out,-1)
@@ -183,15 +251,31 @@ def parallel_run(job_arg):
 	## convert 1D result to 2D matrix
 	matrix = array_to_matrix(log_out,(i2-i1),s,i1,symmetric_flag)
 
-	result = job_result()
-	result.risk = matrix
+	#result = job_result()
+	shared_risk[i1:i2,:] = matrix
+	del matrix
+	del log_out
 
+	print('i1 = '+str(i1)+ ' calling hyge for protective')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 	## for protective
 	p11 = cache.apply_hyge(g11,xp11,False)
 	p01 = cache.apply_hyge(g01,xp01,False)
 	p10 = cache.apply_hyge(g10,xp10,False)
 	p00 = cache.apply_hyge(g00,xp00,False)
+	del xp11
+	del xp10
+	del xp01
+	del xp00
 	
+	print('i1 = '+str(i1)+ ' final computation')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 	q = numpy.stack((p01,p10,p00))
 	q_min = numpy.amin(q,0)
 	raw_out = numpy.divide(p11,q_min)
@@ -214,13 +298,20 @@ def parallel_run(job_arg):
 	log_out[log_out<0] = 0
 	## convert 1D result to 2D matrix
 	matrix = array_to_matrix(log_out,(i2-i1),s,i1,symmetric_flag)
-	result.protective = matrix
+	shared_protective[i1:i2,:] = matrix
+	del log_out
+	del matrix
+	print('i1 = '+str(i1)+ ' return')
+	t = time.localtime()
+	current_time = time.strftime("%H:%M:%S", t)
+	print(current_time)
+	sys.stdout.flush()
 
-	return result
+	#return result
 
 
 def run(model,alpha1,alpha2,n_workers,R):
-
+	print('computing interacttion. R='+str(R)+' model = '+model)
 	## output name
 	output_name = 'data/ssM_hygessi_'+ model+'_R'+str(R) + '.pkl'
 	
@@ -230,11 +321,16 @@ def run(model,alpha1,alpha2,n_workers,R):
 	snpdata_r = pickle.load(pkl_r)
 	pkl_d.close()
 	pkl_r.close()
+	print('SNPdatas loaded')
 
 
 	pheno = snpdata_r.pheno
 	dataR = snpdata_r.data
 	dataD = snpdata_d.data
+
+	#pheno = pheno.T
+	#dataR = dataR.T
+	#dataD = dataD.T
 
 
 
@@ -249,6 +345,8 @@ def run(model,alpha1,alpha2,n_workers,R):
 		dataj = dataD
 
 
+	print(pheno.shape)
+	sys.stdout.flush()
 	population_size = pheno.shape[0]
 
 	## shuffle phenotypes if R != 0
@@ -264,6 +362,13 @@ def run(model,alpha1,alpha2,n_workers,R):
 
 	sx = datai
 	sy = dataj
+	sx = pd.DataFrame(data=sx)
+	sy = pd.DataFrame(data=sy)
+	pheno = pd.DataFrame(data=pheno)
+	# for testing
+	#sx = sx.iloc[:,0:16000]
+	#sy = sy.iloc[:,0:16000]
+
 	s = sx.shape[1]
 
 
@@ -284,10 +389,23 @@ def run(model,alpha1,alpha2,n_workers,R):
 			else:
 				idx.append(idx[i] + share)
 
+	print('indices for parallel shares:')
+	print(idx)
+	sys.stdout.flush()
 	# assign job arguments
 	job_args = []
+	t_x = sx.values[0:5,0:5]
+	print(t_x)
+	sys.stdout.flush()
+	result_risk = numpy.ctypeslib.as_ctypes(numpy.zeros((s, s)))
+	result_protective = numpy.ctypeslib.as_ctypes(numpy.zeros((s, s)))
+	shared_risk = sharedctypes.RawArray(result_risk._type_, result_risk)
+	shared_protective = sharedctypes.RawArray(result_protective._type_, result_protective)
 	for i in range(n_workers):
+		print(i)
+		sys.stdout.flush()
 		job_arg = job_quota(population_size,case_size,control_size)
+		print('job arg created')
 		job_arg.alpha1 = alpha1
 		job_arg.alpha2 = alpha2
 		if model == 'RR' or model == 'DD':
@@ -296,25 +414,36 @@ def run(model,alpha1,alpha2,n_workers,R):
 			job_arg.symmetric = False
 		job_arg.i1 = idx[i]
 		job_arg.i2 = idx[i+1]
+		print('ids set')
+		print(sx.shape)
+		sys.stdout.flush()
 		job_arg.sx = sx.values[:,job_arg.i1:job_arg.i2]
+		print(job_arg.sx.shape)
+		sys.stdout.flush()
 		job_arg.sy = sy.values
 		job_arg.pheno = pheno
+		#job_arg.shared_risk = shared_risk
+		#job_arg.shared_protective = shared_protective
 		job_args.append(job_arg)
+		print('job arg added')
 
+	sys.stdout.flush()
 
 	## creating parallel pool
-	pool = mp.Pool(processes=n_workers)
+	pool = mp.Pool(processes=n_workers,initializer=init_worker,initargs=(shared_risk,shared_protective))
 	results = pool.map(parallel_run, job_args)
 
-	result_risk = numpy.zeros((s,s))
-	result_protective = numpy.zeros((s,s))
-	for i in range(n_workers):
-		m_r = results[i].risk
-		m_p = results[i].protective
-		i1 = idx[i]
-		i2 = idx[i+1]
-		result_risk[i1:i2,:] = m_r
-		result_protective[i1:i2,:] = m_p
+	#result_risk = numpy.zeros((s,s))
+	#result_protective = numpy.zeros((s,s))
+	#for i in range(n_workers):
+	#	m_r = results[i].risk
+	#	m_p = results[i].protective
+	#	i1 = idx[i]
+	#	i2 = idx[i+1]
+	#	result_risk[i1:i2,:] = m_r
+	#	result_protective[i1:i2,:] = m_p
+	result_risk = numpy.ctypeslib.as_array(shared_risk)
+	result_protective = numpy.ctypeslib.as_array(shared_protective) 
 
 	## copy over diagonal for DD - RR
 	if model == 'RR' or model == 'DD':
@@ -343,7 +472,7 @@ def run(model,alpha1,alpha2,n_workers,R):
 
 	# Save data to pickle file.
 	final = open(output_name, 'wb')
-	pickle.dump(network, final)
+	pickle.dump(network, final,protocol=4)
 	final.close()
 
 
@@ -390,5 +519,5 @@ def combine(alpha1,alpha2,n_workers,R):
 	## save in the pickle format
 	network = InteractionNetwork.InteractionNetwork(risk_max,protective_max,risk_max_id,protective_max_id)
 	final = open(output_name, 'wb')
-	pickle.dump(network, final)
+	pickle.dump(network, final,protocol=4)
 	final.close()

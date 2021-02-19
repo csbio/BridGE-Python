@@ -1,6 +1,7 @@
 from scipy.stats import hypergeom
 import numpy as np
 import matplotlib.pyplot as plt
+import functools
 
 # HYGETEST computes Hypergeometric cumulative distribution for
 # the given inputs.
@@ -15,6 +16,7 @@ import matplotlib.pyplot as plt
 # logpv - negative log10(p-value)
 # pv - p-value
 
+@functools.lru_cache(maxsize=100000)
 def hygetest(n,d,k,m):
     pv = 1 - hypergeom.cdf(k-1,n,m,d)
     #logpv = -np.log10(pv)

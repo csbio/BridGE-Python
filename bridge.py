@@ -35,6 +35,7 @@ if __name__ == '__main__':
 	snpPerms = 100
 	pval_cutoff = 0.05
 	fdrcut = 0.4
+	i = -1
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
 			o = arg.split('=')[0]
@@ -68,6 +69,8 @@ if __name__ == '__main__':
 				pval_cutoff = float(a)
 			elif o == '--fdrCutoff':
 				fdrcut = flot(a)
+			elif o == '--i':
+				i = int(a)
 
 
 	## run job
@@ -116,11 +119,17 @@ if __name__ == '__main__':
 		if not path.exists('data/SNPdataAR.pkl'):
 			sys.exit('data/SNPdataAR.pkl not found')
 		if model == 'combined':
-			for R in range(sample_perms+1):
-				ci.combine(alpha1,alpha2,n_workers,R)
+			if i == -1:
+				for R in range(sample_perms+1):
+					ci.combine(alpha1,alpha2,n_workers,R)
+			else:
+				ci.combine(alpha1,alpha2,n_workers,i)
 		else:
-			for R in range(sample_perms+1):
-				ci.run(model,alpha1,alpha2,n_workers,R)
+			if i == -1:
+				for R in range(sample_perms+1):
+					ci.run(model,alpha1,alpha2,n_workers,R)
+			else:
+				ci.run(model,alpha1,alpha2,n_workers,i)
 
 	elif job == 'SamplePermutation':
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):

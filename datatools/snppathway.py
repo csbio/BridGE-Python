@@ -31,7 +31,9 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     rss = SNPdata.rsid
     rs_order = []
     for rs in rss:
-        rs_order.append(np.where(rsg==rs)[0][0])
+        tmp = np.where(rsg==rs)
+        if tmp[0].shape[0] > 0:
+            rs_order.append(tmp[0][0])
     sgm = sgm.iloc[rs_order]
 
     # Only keeping the columns in both the snp-gene pathway
