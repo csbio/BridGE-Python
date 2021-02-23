@@ -7,7 +7,7 @@ from datatools import mapsnp2gene as snp2gene
 from datatools import snppathway as snpp
 from datatools import bpmind as bpm
 from corefuns import matrix_operations_par as ci
-from corefuns import genstats as gs
+from corefuns import genstats_perm as gs
 from corefuns import fdrsampleperm as fdr
 from corefuns import collectresults as clr
 
@@ -141,15 +141,11 @@ if __name__ == '__main__':
                 	sys.exit('data/SNPdataAD.pkl not found')
 		if not path.exists('data/SNPdataAR.pkl'):
                 	sys.exit('data/SNPdataAR.pkl not found')
-		for R in range(sample_perms+1):
-			if model == 'combined':
-				ci.combine(alpha1,alpha2,n_workers,R)
-				# build ssM file name
-				ssmfile = 'data/ssM_hygessi_combined_R'+ str(R) + '.pkl'
-			else:
-				ci.run(model,alpha1,alpha2,n_workers,R)	
-				ssmfile = 'data/ssM_hygessi_' + model + '_R'+ str(R) + '.pkl'
-			gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath)
+		if model == 'combined':
+			ssmfile = 'data/ssM_hygessi_combined_R'+ str(i) + '.pkl'
+		else:
+			ssmfile = 'data/ssM_hygessi_' + model + '_R'+ str(i) + '.pkl'
+		gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers)
 
 	elif job == 'Analysis':
 		bpmfile = 'data/BPMind.pkl'
