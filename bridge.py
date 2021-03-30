@@ -9,7 +9,8 @@ from datatools import bpmind as bpm
 from corefuns import matrix_operations_par as ci
 from corefuns import genstats_perm as gs
 from corefuns import fdrsampleperm as fdr
-from corefuns import collectresults as clr
+from corefuns import collectresults as cl
+import datetime
 
 ## main caller of bridge
 
@@ -17,8 +18,8 @@ from corefuns import collectresults as clr
 # --job : desired job
 # --plinkFile: plink file
 # --genesets: geneset symbolsFile and entrezFile without extension
-
 if __name__ == '__main__':
+	print('program started')
 	## parse input arguments
 	job = ''
 	plinkfile = ''
@@ -30,12 +31,13 @@ if __name__ == '__main__':
 	alpha1 = 0.05
 	alpha2 = 0.05
 	n_workers = 4
-	sample_perms = 1
+	sample_perms = 0
 	binaryNetwork = False
 	snpPerms = 100
-	pval_cutoff = 0.05
-	fdrcut = 0.4
 	i = -1
+	pval_cutoff = 0.05
+	fdrcut = 0.1
+	snppathwayfile = 'data/snp_pathway_min10_max300.pkl'
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
 			o = arg.split('=')[0]
@@ -67,14 +69,18 @@ if __name__ == '__main__':
 				snpPerms = int(a)
 			elif o == '--pvalueCutoff':
 				pval_cutoff = float(a)
-			elif o == '--fdrCutoff':
-				fdrcut = flot(a)
 			elif o == '--i':
 				i = int(a)
+			elif o == '--fdrcut':
+				fdrcut = int(a)
+			elif o == '--snpPathFile':
+				snppathwayfile = a
 
 
 	## run job
 	if job == 'DataProcess':
+		print('data processing...')
+		sys.stdout.flush()
 		## data processing step
 
 		## convert plinkfile to pickle
@@ -86,6 +92,7 @@ if __name__ == '__main__':
 		if not path.exists(rawfile) or not path.exists(bimfile) or not path.exists(famfile):
 			sys.exit('plinkFiles do not exist')
 		finalfile = plinkfile + '.pkl'
+		print('final file made')
 		p2p.plink2pkl(rawfile, bimfile, famfile, finalfile)
 		## converting snp data based on the disease model
 		ba.bindataa(finalfile,'r')
@@ -119,17 +126,9 @@ if __name__ == '__main__':
 		if not path.exists('data/SNPdataAR.pkl'):
 			sys.exit('data/SNPdataAR.pkl not found')
 		if model == 'combined':
-			if i == -1:
-				for R in range(sample_perms+1):
-					ci.combine(alpha1,alpha2,n_workers,R)
-			else:
-				ci.combine(alpha1,alpha2,n_workers,i)
+			ci.combine(alpha1,alpha2,n_workers,i)
 		else:
-			if i == -1:
-				for R in range(sample_perms+1):
-					ci.run(model,alpha1,alpha2,n_workers,R)
-			else:
-				ci.run(model,alpha1,alpha2,n_workers,i)
+			ci.run(model,alpha1,alpha2,n_workers,i)
 
 	elif job == 'SamplePermutation':
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
@@ -142,8 +141,11 @@ if __name__ == '__main__':
 		if not path.exists('data/SNPdataAR.pkl'):
                 	sys.exit('data/SNPdataAR.pkl not found')
 		if model == 'combined':
+			#ci.combine(alpha1,alpha2,n_workers,R)
+			# build ssM file name
 			ssmfile = 'data/ssM_hygessi_combined_R'+ str(i) + '.pkl'
 		else:
+			#ci.run(model,alpha1,alpha2,n_workers,R)	
 			ssmfile = 'data/ssM_hygessi_' + model + '_R'+ str(i) + '.pkl'
 		gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers)
 
@@ -158,13 +160,27 @@ if __name__ == '__main__':
 		if not path.exists(ssmfile):
 			sys.exit(ssmfile+' not found')
 		fdr.fdrsampleperm(ssmfile, bpmfile, pval_cutoff, minPath, sample_perms)
-		sgmFile = 'data/snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
-		snppathwayfile = 'data/snp_pathway_min'+str(minPath)+'_max'+str(maxPath)+'.pkl'
-		if not path.exists(sgmFile):
-			sys.exit('snp_gene mapping not found')
+	elif job == 'collect':
+		print('collecting the results...')
+		bpmfile = 'data/BPMind.pkl'
+		#snppathwayfile = 'data/snp_pathway_min10_max300.pkl'
+		#snpgenemappingfile  = 'data/snpgenemapping_50kb.pkl'
+		snpgenemappingfile = 'snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
+		validationfile = None
+		if not path.exists(bpmfile):
+			sys.exit('bpm file not found at:'+bpmfile)
 		if not path.exists(snppathwayfile):
-			sys.exit('snp_pathway mapping not found')
-		ssm_tmp = ssmfile.split('/')
-		ssm_tmp[-1] = 'results_' + ssm_tmp[-1]
-		resultsfile = '/'.join(ssm_tmp)
-		clr.collectresults(resultsfile,fdrcut,ssmfile,bpmfile,snppathwayfile,sgmFile)
+			sys.exit('snp-pathway mapping file not found')
+		if not path.exists(snpgenemappingfile):
+			sys.dxit('snpgenemappingfile not found, check mapping Distance arg')
+		if model == 'combined':
+			ssmfile = 'data/ssM_hygessi_combined_R0.pkl'
+			resultsfile = 'data/results_ssM_hygessi_combined_R0.pkl'
+		else:
+			ssmfile = 'data/ssM_hygessi_' + model + '_R0.pkl'
+			resultsfile = 'data/results_ssM_hygessi_'+model +'_R0.pkl'
+		if not path.exists(ssmfile):
+			sys.exit('interaction file not found, check model arg')
+		if not path.exists(resulstfile):
+			sys.exit('results file from analysis module not found')
+		cl.collectresults(resultsfile,fdrcut,ssmfile,bpmfile,snppathwayfile,snpgenemappingfile,validationfile)
