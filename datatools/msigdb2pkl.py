@@ -3,6 +3,8 @@ import pickle
 from classes import genesetdataclass as gsc
 import numpy as np
 import math
+import sys
+import datetime
 
 # MSIGDB2PKL convert MsigDB gene set file (.gmt) to pickle file (Python pkl).
 #
@@ -17,18 +19,35 @@ import math
 
 def msigdb2pkl(symbolsFile, entrezFile):
     # Reading files into dataframes.
-    sdf = pd.read_csv(symbolsFile, sep=r"\s+", header=None, engine='python')
-    edf = pd.read_csv(entrezFile, sep=r"\s+", header=None, engine='python')
+    # first determine the maximum number of columns in csv file
+    sdf = pd.read_csv(symbolsFile,header=None, engine='python')
+    m = 0
+    for i in range(sdf.shape[0]):
+        tmp = sdf.iloc[i][0]
+        tmp = tmp.split()
+        if len(tmp) > m:
+            m = len(tmp)
+    r = range(m)
+    #names = map(str,r)
+    #names = list(names)
+    sdf = pd.read_csv(symbolsFile, sep='\s+', header=None, names= r,engine='python')
+    edf = pd.read_csv(entrezFile, sep='\s+', header=None, names= r,engine='python')
+    print('symbols file loaded into dataframe')
+    print(datetime.datetime.now())
+    sys.stdout.flush()
 
     # Accumulator list, symbol list, and entrezID list
     acclist, symlist, idlist = [], [], []
 
     # Iterating over (3 to last) columns, building pathway, symbol and ID lists.
-    for i in range(2, sdf.shape[1]):
+    for i in range(2,sdf.shape[1]):
         acclist += tuple(zip(sdf[0], sdf[i]))
         symlist += list(sdf[i])
         idlist += list(edf[i])
 
+    print('for loop for creating list done')
+    print(datetime.datetime.now())
+    sys.stdout.flush() 
     # Creating dictionary for easy lookup of entrezID by symbol.
     symboldict = dict(zip(symlist, pd.to_numeric(idlist)))
 
@@ -43,6 +62,7 @@ def msigdb2pkl(symbolsFile, entrezFile):
     symlist = np.array(list(set(symlist)))
     pwlist = np.array(list(sdf[0]))
     symboldict = dict(set(symboldict))
+
 
     # Building gene pathway matrix (gpm) of appropriate size, and adding labels.
     gpm = pd.DataFrame(np.zeros((len(symlist), sdf.shape[0])),
