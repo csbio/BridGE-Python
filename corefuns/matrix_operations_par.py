@@ -219,6 +219,11 @@ def parallel_run(job_arg):
 	p01 = cache.apply_hyge(g01,x01,True)
 	p10 = cache.apply_hyge(g10,x10,True)
 	p00 = cache.apply_hyge(g00,x00,True)
+	eps = 0.0000000001
+	p11 = p11 + eps
+	p10 = p10 + eps
+	p01 = p01 + eps
+	p00 = p00 + eps
 	del x11
 	del x01
 	del x10
