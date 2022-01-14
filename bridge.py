@@ -181,6 +181,6 @@ if __name__ == '__main__':
 			resultsfile = 'data/results_ssM_hygessi_'+model +'_R0.pkl'
 		if not path.exists(ssmfile):
 			sys.exit('interaction file not found, check model arg')
-		if not path.exists(resulstfile):
+		if not path.exists(resultstfile):
 			sys.exit('results file from analysis module not found')
 		cl.collectresults(resultsfile,fdrcut,ssmfile,bpmfile,snppathwayfile,snpgenemappingfile,validationfile)
