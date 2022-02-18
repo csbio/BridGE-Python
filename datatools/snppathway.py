@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 from classes import snpsetclass as snps
+import pandas as pd
 
 def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
 
@@ -29,12 +30,18 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     # sort sgm rsids based on the SNPdata
     rsg = sgm.index.values
     rss = SNPdata.rsid
+    tmp_sgm = np.zeros((rss.shape[0],sgm.shape[1]))
     rs_order = []
-    for rs in rss:
+    #for rs in rss:
+    for i in range(rss.shape[0]):
+        rs = rss[i]
         tmp = np.where(rsg==rs)
         if tmp[0].shape[0] > 0:
-            rs_order.append(tmp[0][0])
-    sgm = sgm.iloc[rs_order]
+            #rs_order.append(tmp[0][0])
+            tmp_sgm[i,:] = sgm.iloc[tmp[0][0],:]
+
+    #sgm = sgm.iloc[rs_order]
+    sgm = pd.DataFrame(tmp_sgm,index=rss,columns=sgm.columns)
 
     # Only keeping the columns in both the snp-gene pathway
     testm = sgm[sgpm.index]

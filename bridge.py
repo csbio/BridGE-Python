@@ -93,16 +93,16 @@ if __name__ == '__main__':
 			sys.exit('plinkFiles do not exist')
 		finalfile = plinkfile + '.pkl'
 		print('final file made')
-		#p2p.plink2pkl(rawfile, bimfile, famfile, finalfile)
+		p2p.plink2pkl(rawfile, bimfile, famfile, finalfile)
 		## converting snp data based on the disease model
-		#ba.bindataa(finalfile,'r')
-		#ba.bindataa(finalfile,'d')
+		ba.bindataa(finalfile,'r')
+		ba.bindataa(finalfile,'d')
 		symbolsFile = genesets + '.symbols.gmt'
 		entrezFile = genesets + '.entrez.gmt'
 		if not path.exists(symbolsFile) or not path.exists(entrezFile):
 			sys.exit('genesets do not exist')
 		## prepare gene set information
-		#msig2p.msigdb2pkl(symbolsFile, entrezFile)
+		msig2p.msigdb2pkl(symbolsFile, entrezFile)
 		if not path.exists(gene_annotation):
 			sys.exit('gene annotation file not found')
 		sgmFile = 'snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 		dir_sgm[-1] = sgmFile
 		sgmfile = s.join(dir_sgm)
 		## build relationship between snps and genes
-		#snp2gene.mapsnp2gene(bimfile, gene_annotation, mappingDistance, 'matrix', sgmfile) # matrix mode - #change
+		snp2gene.mapsnp2gene(bimfile, gene_annotation, mappingDistance, 'matrix', sgmfile) # matrix mode - #change
 		## extract snp-pathway information
 		geneset_pkl = genesets + '.pkl'
 		outfile = snpp.snppathway(finalfile, sgmfile, geneset_pkl, minPath, maxPath)
