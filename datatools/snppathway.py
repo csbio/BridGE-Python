@@ -23,9 +23,9 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     sgpm = sgpm.sort_index(axis=1)
 
     # Sum each pathway to see if we should keep it, then sorting the rows.
-    pwsums = sgpm.sum()
-    validpwys = pwsums[pwsums.apply(lambda x: filter_val(minPath, maxPath, x))]
-    sgpm = sgpm[validpwys.index]
+    #pwsums = sgpm.sum()
+    #validpwys = pwsums[pwsums.apply(lambda x: filter_val(minPath, maxPath, x))]
+    #sgpm = sgpm[validpwys.index]
     
     # sort sgm rsids based on the SNPdata
     rsg = sgm.index.values
