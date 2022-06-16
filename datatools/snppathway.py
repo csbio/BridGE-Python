@@ -53,7 +53,7 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     fnlsum = final.astype(bool).sum()
     validpwysfnl = fnlsum[fnlsum.apply(lambda x: filter_val(minPath, maxPath, x))]
     spm = final[validpwysfnl.index]
-    spm = spm.replace(to_replace=(2), value=1)
+    spm = spm.replace(to_replace='^[1-9][0-9]*$', value=1,regex=True)
     pathways = spm.astype(bool).sum()
 
     # Preparing data and filename for pickle storage.
