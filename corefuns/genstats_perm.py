@@ -76,7 +76,7 @@ def call_chi2(table): ## input format (in each row): ## f11(bpm interactions) - 
 	for i in range(tests):
 		contingency_table = table[i,:]
 		obs = np.reshape(contingency_table,(2,2))
-		g, p, dof, expctd = chi2_contingency(obs)
+		g, p, dof, expctd = chi2_contingency(obs,correction=False)
 		results[i] = p
 	return results
 
@@ -436,7 +436,7 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 	chi2_bpm_local[dense_index==2] = chi2_bpm_2[dense_index==2]
 
 	## keeping track of significant bpms
-	ind2keep_bpm = (chi2_bpm_local >= -1 * np.log10(0.1)) & (bpmind1size > minPath) & (bpmind2size > minPath)
+	ind2keep_bpm = (chi2_bpm_local >= -1 * np.log10(0.1)) & (bpmind1size >= minPath) & (bpmind2size >= minPath)
 
 		
 	## keeping denser pathway in ind1_new 

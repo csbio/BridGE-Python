@@ -72,7 +72,7 @@ if __name__ == '__main__':
 			elif o == '--i':
 				i = int(a)
 			elif o == '--fdrcut':
-				fdrcut = int(a)
+				fdrcut = float(a)
 			elif o == '--snpPathFile':
 				snppathwayfile = a
 

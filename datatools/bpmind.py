@@ -39,12 +39,14 @@ def bpmind(snpPathwayFile):
     BPMind1, BPMind2, ind1size, ind2size = [], [], [], []
     for i in range(len(snpmat.columns)):
         p1 = snpmat.iloc[:,i].to_numpy()
+        p1[p1>1] = 1
         if i % 10 == 0:
             print('in loop:'+str(i))
             print(datetime.datetime.now())
             sys.stdout.flush()
         for j in range(i+1, len(snpmat.columns)):
             p2 = snpmat.iloc[:,j].to_numpy()
+            p2[p2>1] = 1
             ind1, ind2 = [], []
             #for k in range(len(snpmat)):
             #    if (snpmat.iloc[k][i]==1 and snpmat.iloc[k][j]!=1):
