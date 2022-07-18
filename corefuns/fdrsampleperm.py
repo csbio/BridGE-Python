@@ -238,11 +238,13 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
     testM = list(map(list, zip(vrows, valid_pvs, fdr1)))
     # print(testM)
 
-    testM.sort(key=lambda x: -x[1])
+    testM.sort(key=lambda x: -x[2])
     # print(testM)
 
+    testM = np.array(testM)
     for i in range(len(testM)):
-        testM[i][2] = min(x[1] for x in testM[0:i+1])
+        idx = testM[:,1] >= testM[i,1]
+        testM[i,2] = np.min(testM[idx,2])
 
     # assign FDR to BPMs
     for i in range(len(testM)):
@@ -258,8 +260,10 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
     testM.sort(key=lambda x: (-x[1], x[3]))
     # print(testM)
 
+    testM = np.array(testM)
     for i in range(len(testM)):
-        testM[i][2] = min(x[1] for x in testM[0:i+1])
+        idx = (testM[:,1] >= testM[i,1]) & (testM[:,3] <= testM[i,3])
+        testM[i,2] = np.min(testM[idx,2])
 
     # assign FDR to BPMs
     for i in range(len(testM)):
