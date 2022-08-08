@@ -338,6 +338,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			D = np.broadcast_to(ind1.shape[0],in_int.shape)
 			hype_in = np.concatenate((N,D,in_int,all_int),axis=1)
 			gi_hyge = np.apply_along_axis(hygetest_caller,1,hype_in)
+			gi_hyge = -1 * np.log10(gi_hyge)
 
 			t = {'snps': snps,'genes': genes,'snp_mean_gi': snp_mean_gi, 'snp_mean_gi_bg': snp_mean_gi_bg, 'gi_fold': gi_fold, 'gi_hyge': gi_hyge}
 			output_path2_snp = pd.DataFrame(data=t,columns=['snps','genes', 'snp_mean_gi','snp_mean_gi_bg','gi_fold','gi_hyge'])
