@@ -60,10 +60,10 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	bpm_path1_drivers, bpm_path2_drivers = [], []
 	wpm_path_drivers = []
 
-	for i in range(n):
-		pathname1 = path1.iloc[i][0]
-		pathname2 = path2.iloc[i][0]
-		effect = effects.iloc[i][0]
+	for i_path in range(n):
+		pathname1 = path1.iloc[i_path][0]
+		pathname2 = path2.iloc[i_path][0]
+		effect = effects.iloc[i_path][0]
 
 
 		if effect == 'protective':
@@ -161,7 +161,11 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		ind2_gene = np.array(ind2_gene)
 		ssm_dis = ssm[ind1,:][:,ind2]
 		m_id = max_id[ind1,:][:,ind2]
-		bin_int_index = np.argwhere(ssm_dis>0.2)
+		if p_id1 == p_id2:
+			tmp_dis = np.tril(ssm_dis)
+		else:
+			tmp_dis = ssm_dis
+		bin_int_index = np.argwhere(tmp_dis>0.2)
 		i = bin_int_index[:,0]
 		j = bin_int_index[:,1]
 		snps1 = ind1_snp[i]
@@ -306,6 +310,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		D = np.broadcast_to(ind2.shape[0],in_int.shape)
 		hype_in = np.concatenate((N,D,in_int,all_int),axis=1)
 		gi_hyge = np.apply_along_axis(hygetest_caller,1,hype_in)
+		gi_hyge	= -1 * np.log10(gi_hyge)
 
 		t = {'snps': snps,'genes': genes,'snp_mean_gi': snp_mean_gi, 'snp_mean_gi_bg': snp_mean_gi_bg, 'gi_fold': gi_fold, 'gi_hyge': gi_hyge}
 		output_path1_snp = pd.DataFrame(data=t,columns=['snps','genes', 'snp_mean_gi','snp_mean_gi_bg','gi_fold','gi_hyge'])

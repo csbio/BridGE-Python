@@ -51,6 +51,6 @@ def bpmsim(BPMind1x, BPMind2x, BPMind1y, BPMind2y):
 
 def cellsquareform(Y):
     n = len(Y[0])
-    Z = Y[np.nonzero(np.logical_and(np.tril(np.ones((n, n), dtype=bool), -1), Y))]
+    Z = Y[np.nonzero(np.logical_and(np.triu(np.ones((n, n), dtype=bool), 1), Y))]
     Z = np.transpose(Z)
     return Z
