@@ -48,17 +48,35 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
             bpm_ind2_ind1 = bpmind.bpm['ind2'][ind1]
 
             BPM_sim[0] = bpmsim.bpmsim(bpm_ind1_ind1, bpm_ind2_ind1, bpm_ind1_ind1, bpm_ind2_ind1)
-            print('returned from bpmsim in ind1')
-            time_log()
 
             TTT = (BPM_sim[0]>=0.25).astype(int)
-            noRD[0], group[0] = sparse.csgraph.connected_components(TTT)
+            #noRD[0], group[0] = sparse.csgraph.connected_components(TTT)
+            ## retrieve indices and sort based on FDR
+            tmp_ind = ind1
+            fdrs = fdrBPM.loc[tmp_ind]['bpm2']
+            tmp_idx = fdrs.argsort(kind = 'stable').to_numpy()
+            fdrs_sorted = fdrs.iloc[tmp_idx]
+            ## search for group and assign
+            tmp_group = np.zeros((fdrs_sorted.shape[0],))
+            for x1 in range(fdrs_sorted.shape[0]):
+                if x1 == 0:
+                    continue
+                ttt_idx1 = tmp_idx[x1]
+                for x2 in range(x1+1):
+                    if x2 == x1:
+                        tmp_group[x1] = max(tmp_group) + 1
+                    else:
+                        ttt_idx2 = tmp_idx[x2]
+                        if TTT[ttt_idx1,ttt_idx2] == 1:
+                            tmp_group[x1] = tmp_group[x2]
+                            break
+            group[0] = tmp_group
             a0=len(list(set(group[0])))
 
         # Has exactly one row
         elif len(ind1) == 1:
             a0=1
-            group[0] = [1]
+            group[0] = [0]
         else:
             a0=0
             group[0] = []
@@ -71,14 +89,36 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
             BPM_sim[1] = bpmsim.bpmsim(bpm_ind1_ind2, bpm_ind2_ind2, bpm_ind1_ind2, bpm_ind2_ind2)
 
             TTT = (BPM_sim[1]>=0.25).astype(int)
-            noRD[1], group[1] = sparse.csgraph.connected_components(TTT)
+            #noRD[1], group[1] = sparse.csgraph.connected_components(TTT)
+            #b0=len(list(set(group[1])))
+            ## retrieve indices and sort based on FDR
+            tmp_ind = ind2 +  len(bpmind.bpm['size'])
+            fdrs = fdrBPM.loc[tmp_ind]['bpm2']
+            tmp_idx = fdrs.argsort(kind='stable').to_numpy()
+            fdrs_sorted = fdrs.iloc[tmp_idx]
+            ## search for group and assign
+            tmp_group = np.zeros((fdrs_sorted.shape[0],))
+            for x1 in range(fdrs_sorted.shape[0]):
+                if x1 == 0:
+                    continue
+                ttt_idx1 = tmp_idx[x1]
+                for x2 in range(x1+1):
+                    if x2 == x1:
+                        tmp_group[x1] = max(tmp_group) + 1
+                    else:
+                        ttt_idx2 = tmp_idx[x2]
+                        if TTT[ttt_idx1,ttt_idx2] == 1:
+                            tmp_group[x1] = tmp_group[x2]
+                            break
+            group[1] = tmp_group
             b0=len(list(set(group[1])))
+            
 
 
         # Has exactly one row
         elif len(ind2) == 1:
             b0=1
-            group[1] = [1]
+            group[1] = [0]
         else:
             b0=0
             group[1] = []
@@ -90,14 +130,34 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
             BPM_sim[2] = bpmsim.bpmsim(wpm_ind_ind3, wpm_ind_ind3, wpm_ind_ind3, wpm_ind_ind3)
 
             TTT = (BPM_sim[2]>=0.25).astype(int)
-            noRD[2], group[2] = sparse.csgraph.connected_components(TTT)
+            #noRD[2], group[2] = sparse.csgraph.connected_components(TTT)
+            ## retrieve indices and sort based on FDR
+            tmp_ind = ind3
+            fdrs = fdrWPM.loc[tmp_ind]['wpm2']
+            tmp_idx = fdrs.argsort(kind = 'stable').to_numpy()
+            fdrs_sorted = fdrs.iloc[tmp_idx]
+            ## search for group and assign
+            tmp_group = np.zeros((fdrs_sorted.shape[0],))
+            for x1 in range(fdrs_sorted.shape[0]):
+                if x1 == 0:
+                    continue
+                ttt_idx1 = tmp_idx[x1]
+                for x2 in range(x1+1):
+                    if x2 == x1:
+                        tmp_group[x1] = max(tmp_group) + 1
+                    else:
+                        ttt_idx2 = tmp_idx[x2]
+                        if TTT[ttt_idx1,ttt_idx2] == 1:
+                            tmp_group[x1] = tmp_group[x2]
+                            break
+            group[2] = tmp_group
             c0=len(list(set(group[2])))
 
 
         # Has exactly one row
         elif len(ind3) == 1:
             c0=1
-            group[2] = [1]
+            group[2] = [0]
         else:
             c0=0
             group[2] = []
@@ -109,14 +169,33 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
             BPM_sim[3] = bpmsim.bpmsim(wpm_ind_ind4, wpm_ind_ind4, wpm_ind_ind4, wpm_ind_ind4)
 
             TTT = (BPM_sim[3]>=0.25).astype(int)
-            noRD[3], group[3] = sparse.csgraph.connected_components(TTT)
+            #noRD[3], group[3] = sparse.csgraph.connected_components(TTT)
+            tmp_ind = ind4 + len(bpmind.wpm['size'])
+            fdrs = fdrWPM.loc[tmp_ind]['wpm2']
+            tmp_idx = fdrs.argsort(kind = 'stable').to_numpy()
+            fdrs_sorted = fdrs.iloc[tmp_idx]
+            ## search for group and assign
+            tmp_group = np.zeros((fdrs_sorted.shape[0],))
+            for x1 in range(fdrs_sorted.shape[0]):
+                if x1 == 0:
+                    continue
+                ttt_idx1 = tmp_idx[x1]
+                for x2 in range(x1+1):
+                    if x2 == x1:
+                        tmp_group[x1] = max(tmp_group) + 1
+                    else:
+                        ttt_idx2 = tmp_idx[x2]
+                        if TTT[ttt_idx1,ttt_idx2] == 1:
+                            tmp_group[x1] = tmp_group[x2]
+                            break
+            group[3] = tmp_group
             d0=len(list(set(group[3])))
 
 
         # Has exactly one row
         elif len(ind4) == 1:
             d0=1
-            group[3] = [1]
+            group[3] = [0]
         else:
             d0=0
             group[3] = []
@@ -148,16 +227,33 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
             wpm_ind_ind1 = bpmind.wpm['ind'][ind1]
 
             PATH_sim[0] = pathsim.pathsim(wpm_ind_ind1)
-            print('returned from pathsim in ind1')
-            time_log()
             TTT = (PATH_sim[0]>=0.25).astype(int)
-            noRD[0], group[0] = sparse.csgraph.connected_components(TTT)
+            #noRD[0], group[0] = sparse.csgraph.connected_components(TTT)
+            tmp_ind = ind1
+            fdrs = fdrWPM.loc[tmp_ind]['wpm2']
+            tmp_idx = fdrs.argsort(kind = 'stable').to_numpy()
+            fdrs_sorted = fdrs.iloc[tmp_idx]
+            ## search for group and assign
+            tmp_group = np.zeros((fdrs_sorted.shape[0],))
+            for x1 in range(fdrs_sorted.shape[0]):
+                if x1 == 0:
+                    continue
+                ttt_idx1 = tmp_idx[x1]
+                for x2 in range(x1+1):
+                    if x2 == x1:
+                        tmp_group[x1] = max(tmp_group) + 1
+                    else:
+                        ttt_idx2 = tmp_idx[x2]
+                        if TTT[ttt_idx1,ttt_idx2] == 1:
+                            tmp_group[x1] = tmp_group[x2]
+                            break
+            group[0] = tmp_group
             a0=len(list(set(group[0])))
 
         # Has exactly one row
         elif len(ind1) == 1:
             a0=1
-            group[0] = [1]
+            group[0] = [0]
         else:
             a0=0
             group[0] = []
@@ -168,7 +264,26 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
             PATH_sim[1] = pathsim.pathsim(wpm_ind_ind2)
             TTT = (PATH_sim[1]>=0.25).astype(int)
-            noRD[1], group[1] = sparse.csgraph.connected_components(TTT)
+            #noRD[1], group[1] = sparse.csgraph.connected_components(TTT)
+            tmp_ind = ind2 + len(bpmind.wpm['size'])
+            fdrs = fdrWPM.loc[tmp_ind]['wpm2']
+            tmp_idx = fdrs.argsort(kind = 'stable').to_numpy()
+            fdrs_sorted = fdrs.iloc[tmp_idx]
+            ## search for group and assign
+            tmp_group = np.zeros((fdrs_sorted.shape[0],))
+            for x1 in range(fdrs_sorted.shape[0]):
+                if x1 == 0:
+                    continue
+                ttt_idx1 = tmp_idx[x1]
+                for x2 in range(x1+1):
+                    if x2 == x1:
+                        tmp_group[x1] = max(tmp_group) + 1
+                    else:
+                        ttt_idx2 = tmp_idx[x2]
+                        if TTT[ttt_idx1,ttt_idx2] == 1:
+                            tmp_group[x1] = tmp_group[x2]
+                            break
+            group[1] = tmp_group
             b0=len(list(set(group[1])))
 
         # Has exactly one row
