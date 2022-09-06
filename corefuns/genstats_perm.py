@@ -76,7 +76,10 @@ def call_chi2(table): ## input format (in each row): ## f11(bpm interactions) - 
 	for i in range(tests):
 		contingency_table = table[i,:]
 		obs = np.reshape(contingency_table,(2,2))
-		g, p, dof, expctd = chi2_contingency(obs,correction=False)
+		if not obs[0,0] == 0:
+			g, p, dof, expctd = chi2_contingency(obs,correction=False)
+		else:
+			p =1
 		results[i] = p
 	return results
 
