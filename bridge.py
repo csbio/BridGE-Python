@@ -1,3 +1,5 @@
+## main function of BridGE
+
 import sys
 from os import path
 from datatools import plink2pkl as p2p
@@ -12,19 +14,15 @@ from corefuns import fdrsampleperm as fdr
 from corefuns import collectresults as cl
 import datetime
 
-## main caller of bridge
 
-## inputs:
-# --job : desired job
-# --plinkFile: plink file
-# --genesets: geneset symbolsFile and entrezFile without extension
+
 if __name__ == '__main__':
 	print('program started')
-	## parse input arguments
+	# Default parameters defined
 	job = ''
 	plinkfile = ''
-	genesets='data/toy.genesets' ## default - #change
-	gene_annotation = 'data/glist-hg19' ## default - #change
+	genesets='data/toy.genesets' 
+	gene_annotation = 'data/glist-hg19' 
 	mappingDistance = 50000
 	minPath = 10
 	maxPath = 300
@@ -77,7 +75,7 @@ if __name__ == '__main__':
 				snppathwayfile = a
 
 
-	## run job
+	# First module: Data processing
 	if job == 'DataProcess':
 		print('data processing...')
 		sys.stdout.flush()
@@ -92,9 +90,8 @@ if __name__ == '__main__':
 		if not path.exists(rawfile) or not path.exists(bimfile) or not path.exists(famfile):
 			sys.exit('plinkFiles do not exist')
 		finalfile = plinkfile + '.pkl'
-		print('final file made')
 		p2p.plink2pkl(rawfile, bimfile, famfile, finalfile)
-		## converting snp data based on the disease model
+		## converting snp data assuming different disease models
 		ba.bindataa(finalfile,'r')
 		ba.bindataa(finalfile,'d')
 		symbolsFile = genesets + '.symbols.gmt'
@@ -117,8 +114,7 @@ if __name__ == '__main__':
 		outfile = snpp.snppathway(finalfile, sgmfile, geneset_pkl, minPath, maxPath)
 		bpm.bpmind(outfile)
 	elif job == 'ComputeInteraction':
-		## compute interaction network here
-		## input parameters
+		## Validating input parameters
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
 			sys.exit('wrong model')
 		if not path.exists('data/SNPdataAD.pkl'):

@@ -2,6 +2,20 @@ import pandas as pd
 import pickle
 import numpy as np
 
+
+# MAPSNP2GENE creates snp to gene matrix and saves it to a file.
+#
+# INPUTS:
+#   snpAnnotation: path to Plink snp annotation file in .bim format.
+#   geneAnnotation: path to gene annotation file.
+#   mappingDistance: snp to gene mapping distance
+#   option: saving mode for snp-gene map
+#   outfile: file name for saving the results.
+#
+# OUTPUTS:
+#   <outfile>.pkl -This pickle file contains a snp to gene mapping in the DataFrame format.
+
+
 def mapsnp2gene(snpAnnotation, geneAnnotation, mappingDistance, option, outfile):
 
     # Creating SNP dataframe from snp annotation file.
