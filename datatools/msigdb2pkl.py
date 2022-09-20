@@ -32,9 +32,6 @@ def msigdb2pkl(symbolsFile, entrezFile):
     #names = list(names)
     sdf = pd.read_csv(symbolsFile, sep='\s+', header=None, names= r,engine='python')
     edf = pd.read_csv(entrezFile, sep='\s+', header=None, names= r,engine='python')
-    print('symbols file loaded into dataframe')
-    print(datetime.datetime.now())
-    sys.stdout.flush()
 
     # Accumulator list, symbol list, and entrezID list
     acclist, symlist, idlist = [], [], []
@@ -45,9 +42,6 @@ def msigdb2pkl(symbolsFile, entrezFile):
         symlist += list(sdf[i])
         idlist += list(edf[i])
 
-    print('for loop for creating list done')
-    print(datetime.datetime.now())
-    sys.stdout.flush() 
     # Creating dictionary for easy lookup of entrezID by symbol.
     symboldict = dict(zip(symlist, pd.to_numeric(idlist)))
 

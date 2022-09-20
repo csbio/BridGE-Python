@@ -3,6 +3,23 @@ import numpy as np
 from classes import snpsetclass as snps
 import pandas as pd
 
+
+# SNPPathway creates a snp-to-pathway mapping.
+#
+# INPUTS:
+#   dataFile: Path to the file with genotype data in the Pickle format.
+#   sgmFile: SNP to gene mapping file in the Pickle format.
+#   genesets: Gene-set file in pickle format.
+#   minPath: minimum size for a pathway to be in the mapping.
+#   maxPath: maximum size for a pathway to be in the mapping.
+#
+# OUTPUTS:
+#   snp_pathway_min<minPath>_max<maxPath>.pkl -This pickle file contains a snpset class object with following fields:
+#       - pathways: List of pathway names
+#       - spmatrix: Matrix of snp-pathway mapping (Numpy 2d array)
+#       - geneset: Path to geneset file in .pkl format.
+
+
 def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
 
     # Loading pickle files into objects
@@ -22,10 +39,6 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
     sgpm = sgpm.replace(to_replace=(2), value=1)
     sgpm = sgpm.sort_index(axis=1)
 
-    # Sum each pathway to see if we should keep it, then sorting the rows.
-    #pwsums = sgpm.sum()
-    #validpwys = pwsums[pwsums.apply(lambda x: filter_val(minPath, maxPath, x))]
-    #sgpm = sgpm[validpwys.index]
     
     # sort sgm rsids based on the SNPdata
     rsg = sgm.index.values

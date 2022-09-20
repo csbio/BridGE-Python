@@ -6,11 +6,20 @@ from classes import bpmindclass as bpmc
 import datetime
 import sys
 
+
+# BPMIND Exctracts SNP indices for BPM/WPM sets. 
+#
+# INPUTS:
+#   snpPathwayFile: SNP-pathway mapping file in pickle format (.pkl), containing a matrix: Result of the snppathway function. 
+#  
+# OUTPUTS:
+#   BPMind.pkl -This pickle file uses a bpmindclass class with fields:
+#       bpm - DataFrame with all BPM data(pathway names, pathway inices, SNPs in pathaways(redundants removed))
+#       wpm - DataFrame with all WPM data(pathway names, pathway inices, SNPs in pathaways)
+
 def bpmind(snpPathwayFile):
 
     # Reading in pickle datafile
-    print('Hello from bpmind')
-    print(datetime.datetime.now())
     pklin = open(snpPathwayFile,"rb")
     snpset = pickle.load(pklin)
     pklin.close()
@@ -19,40 +28,27 @@ def bpmind(snpPathwayFile):
     pathways = snpset.pathways
     snpmat = snpset.spmatrix
     snpfile = snpset.geneset
-    print('Reading pathways completed')
-    print(datetime.datetime.now())
-    sys.stdout.flush()
 
 
     # Finding all possible combinations of pairs for pathway names and sizes.
     comb = np.array(list(combinations(pathways, 2)))
     combnames = np.array(list(combinations(pathways.index, 2)))
 
+    # Finding WPM indices
     WPMind = []
     for column in snpmat:
         nonzeros = list(np.nonzero(snpmat[column].values)[0])
         WPMind.append(nonzeros)
 
-    print('Starting the for loop, # of outer loops:'+str(len(snpmat.columns)))
-    print(datetime.datetime.now())
-    sys.stdout.flush()
+    # Finding BPM indices
     BPMind1, BPMind2, ind1size, ind2size = [], [], [], []
     for i in range(len(snpmat.columns)):
         p1 = snpmat.iloc[:,i].to_numpy()
         p1[p1>1] = 1
-        if i % 10 == 0:
-            print('in loop:'+str(i))
-            print(datetime.datetime.now())
-            sys.stdout.flush()
         for j in range(i+1, len(snpmat.columns)):
             p2 = snpmat.iloc[:,j].to_numpy()
             p2[p2>1] = 1
             ind1, ind2 = [], []
-            #for k in range(len(snpmat)):
-            #    if (snpmat.iloc[k][i]==1 and snpmat.iloc[k][j]!=1):
-            #        ind1.append(k)
-            #    if (snpmat.iloc[k][i]!=1 and snpmat.iloc[k][j]==1):
-            #        ind2.append(k)
             d1 = p1 - p2
             ind1 = np.where(d1==1)
             ind1 = ind1[0].tolist()
@@ -63,9 +59,6 @@ def bpmind(snpPathwayFile):
             ind2size.append(len(ind2))
             BPMind1.append(ind1)
             BPMind2.append(ind2)
-
-    print(len(pathways))
-    sys.stdout.flush()
 
 
     # Getting between pathway sizes by multiplying combination available pairs.
