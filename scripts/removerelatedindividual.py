@@ -3,6 +3,7 @@ import pandas as pd
 import sys
 
 
+
 if __name__ == '__main__':
 	genomefile = sys.argv[1]
 	pi_hat = float(sys.argv[2])
@@ -29,13 +30,17 @@ if __name__ == '__main__':
 	sum_ibd_sorted[::-1].sort()
 	ind2remove = []
 	while sum_ibd_sorted[0] != 0:
-		idx = np.argwhere(sum_ibd == sum_ibd_sorted[0])[0][0]
+		tmp = np.unique(np.argwhere(sum_ibd == sum_ibd_sorted[0]))
+		idx = tmp.tolist()
 		ibd[idx,:] = 0
 		ibd[:,idx] = 0
 		sum_ibd = np.sum(ibd>=pi_hat,axis=0)
 		sum_ibd_sorted = np.sum(ibd>=pi_hat,axis=0)
 		sum_ibd_sorted[::-1].sort()
-		ind2remove.append(idx)
+		ind2remove.extend(idx)
 	df = pd.DataFrame(varname, columns=['FID1','IID1'])
 	df = df.iloc[ind2remove,:]
 	df.to_csv('related_subject2remove.txt',index=False,sep='\t')
+
+
+
