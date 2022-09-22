@@ -9,12 +9,12 @@ outputFile=$2 # new plink file with matched cases and controls
 # compute ibd file
 if [ ! -f ${plinkFile}.genome ];
 then
-        ./plink --bfile ${plinkFile} --freq --allow-no-sex --out ${plinkFile}
-        ./plink --bfile ${plinkFile} --read-freq ${plinkFile}.frq --genome --allow-no-sex --out ${plinkFile}
+        plink --bfile ${plinkFile} --freq --allow-no-sex --out ${plinkFile}
+        plink --bfile ${plinkFile} --read-freq ${plinkFile}.frq --genome --allow-no-sex --out ${plinkFile}
 fi
 
 # size2 clustering
-./plink --bfile ${plinkFile} --read-genome ${plinkFile}.genome --cluster --cc --mc 2 --ppc 0.01 --noweb --allow-no-sex --out ${plinkFile}
+plink --bfile ${plinkFile} --read-genome ${plinkFile}.genome --cluster --cc --mc 2 --ppc 0.01 --noweb --allow-no-sex --out ${plinkFile}
 
 # get subject list based on clustering
 cat  ${plinkFile}.cluster2|awk '{print $3}'| sort  | uniq -c | sort -nr > cluster2_count.tmp
@@ -30,6 +30,6 @@ mv cluster2.tmp  ${plinkFile}.cluster2
 cat ${plinkFile}.cluster2  | awk '{print $1 "\t" $2 }' >  cluster2_subject2keep
 
 # generate new plink data
-./plink --bfile ${plinkFile} --allow-no-sex --keep cluster2_subject2keep --make-bed --out ${outputFile}
+plink --bfile ${plinkFile} --allow-no-sex --keep cluster2_subject2keep --make-bed --out ${outputFile}
 
 rm cluster2_count.tmp sol.tmp
