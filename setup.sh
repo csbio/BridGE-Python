@@ -9,5 +9,6 @@ mv cyadd*.so corefuns/cyadd.so
 chmod u+x preprocessgwas.sh
 chmod u+x scripts/*.sh
 chmod u+x scripts/plink
+export PATH=scripts/:$PATH
 alias plink=scripts/plink
 
