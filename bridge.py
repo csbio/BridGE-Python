@@ -17,7 +17,6 @@ import datetime
 
 
 if __name__ == '__main__':
-	print('program started')
 	# Default parameters defined
 	job = ''
 	plinkfile = ''
@@ -126,7 +125,7 @@ if __name__ == '__main__':
 		else:
 			ci.run(model,alpha1,alpha2,n_workers,i)
 
-	elif job == 'SamplePermutation':
+	elif job == 'ComputeStats':
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
 			sys.exit('wrong model')
 		bpmfile = 'data/BPMind.pkl'
@@ -139,10 +138,10 @@ if __name__ == '__main__':
 		if model == 'combined':
 			#ci.combine(alpha1,alpha2,n_workers,R)
 			# build ssM file name
-			ssmfile = 'data/ssM_hygessi_combined_R'+ str(i) + '.pkl'
+			ssmfile = 'data/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
 		else:
 			#ci.run(model,alpha1,alpha2,n_workers,R)	
-			ssmfile = 'data/ssM_hygessi_' + model + '_R'+ str(i) + '.pkl'
+			ssmfile = 'data/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
 		gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers)
 
 	elif job == 'Analysis':
@@ -150,9 +149,9 @@ if __name__ == '__main__':
 		if not path.exists(bpmfile):
 			sys.exit('data/BPMind.pkl not found')
 		if model == 'combined':
-			ssmfile = 'data/ssM_hygessi_combined_R0.pkl'
+			ssmfile = 'data/ssM_mhygessi_combined_R0.pkl'
 		else:
-			ssmfile = 'data/ssM_hygessi_' + model + '_R0.pkl'
+			ssmfile = 'data/ssM_mhygessi_' + model + '_R0.pkl'
 		if not path.exists(ssmfile):
 			sys.exit(ssmfile+' not found')
 		fdr.fdrsampleperm(ssmfile, bpmfile, pval_cutoff, minPath, sample_perms)
@@ -170,11 +169,11 @@ if __name__ == '__main__':
 		if not path.exists(snpgenemappingfile):
 			sys.exit('snpgenemappingfile not found, check mapping Distance arg')
 		if model == 'combined':
-			ssmfile = 'data/ssM_hygessi_combined_R0.pkl'
-			resultsfile = 'data/results_ssM_hygessi_combined_R0.pkl'
+			ssmfile = 'data/ssM_mhygessi_combined_R0.pkl'
+			resultsfile = 'data/results_ssM_mhygessi_combined_R0.pkl'
 		else:
-			ssmfile = 'data/ssM_hygessi_' + model + '_R0.pkl'
-			resultsfile = 'data/results_ssM_hygessi_'+model +'_R0.pkl'
+			ssmfile = 'data/ssM_mhygessi_' + model + '_R0.pkl'
+			resultsfile = 'data/results_ssM_mhygessi_'+model +'_R0.pkl'
 		if not path.exists(ssmfile):
 			sys.exit('interaction file not found, check model arg')
 		if not path.exists(resultsfile):

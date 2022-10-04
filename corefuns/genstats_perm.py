@@ -21,7 +21,24 @@ from multiprocessing import sharedctypes
 import os, psutil
 import copy
 import datetime
-# u
+
+genstats(ssmfile,bpmfile,binary_flag,snpPerms,minPath,n_workers,netDensity=0):
+# genstats() computes BPM/WPM/PATH statistics. Can be run parallel.
+#
+# INPUTS:
+#   ssmFile: Interaction networks file in the pickle format.
+#   bpmfile: files containing SNP ids for BPM/WPMs in pickle format.
+#   binary_flag: If True, interaction scores are binarized for computing BPM/WPM/PATH significances
+#   snpPerms: Number of snp permutations used for computing empirical p-values
+#   minPath: minimum size for a pathway to be considered as WPM and in BPM.
+#	n_workers: number of parallel cpu cores the program shoud use
+#
+# OUTPUTS:
+#   genstats_<ssmFile without extension>.pkl - This pickle file contains a GenstasOut class, which itself contains 2 Stats class oject
+#       - protective_stats: Statistics for protective network including ranksum scores,empirical p-values, expected density for BPM/WPMs
+#       - risk_stats: Statistics for risk network including ranksum scores,empirical p-values, expected density for BPM/WPMs
+
+
 
 class perm_args:
 	def __init__(self,id,share,bpmind1,bpmind2,bpmsum,ind2keep_bpm,ind2keep_wpm,ind2keep_path,wpmind,wpmsum,pathind,path_degree,idx1,idx2):
@@ -88,12 +105,8 @@ def ranksum(x,y): ## custom ranksukm similar to the Matlab version
 	## y is out of bpm
 	tmp = np.concatenate((y,x))
 	rnk = rankdata(tmp)
-	#temp = tmp.argsort()
-	#rnk = np.empty_like(temp)
-	#rnk[temp] = np.arange(len(tmp))
 	# tie correction
 	tmp_sorted = np.sort(tmp)
-	#tmp_sorted = tmp[rnk]
 	tmp1 = tmp_sorted[0:-1]
 	tmp2 = tmp_sorted[1:]
 	tie_index = np.where(tmp1 == tmp2)
@@ -132,13 +145,8 @@ def parallel_ranksum(job_arg):
 	bpm_local_tmp = []
 	bpmsum_tmp = []
 	tr = []
-	print('parallel ranksum proc:'+str(job_arg.id))
-	print(job_arg.start)
-	print(job_arg.end)
-	sys.stdout.flush()
 	mm = np.ctypeslib.as_array(shared_mm_c)
 	mm = np.copy(mm)
-	print('mm created'+str(job_arg.id))
 	for i in range(job_arg.start,job_arg.end):
 		id1 = np.array(bpmind1[i])
 		id2 = np.array(bpmind2[i])
@@ -154,15 +162,16 @@ def parallel_ranksum(job_arg):
 		mm_in = mm_in.flatten()
 		mm_out = mm_out.flatten()
 		#s,p = wilcoxon(mm_in,y=mm_out,correction=True, alternative='greater')
-		if i % 100 == 0:
-			print('calling ranksum:'+str(i))
-			t = time.localtime()
-			current_time = time.strftime("%H:%M:%S", t)
-			print(current_time)
-			print('Memory:')
-			process = psutil.Process(os.getpid())
-			print(process.memory_info().rss)
-			sys.stdout.flush()
+## This section is for tracking memory. uncomment from if to sys.stdout.flush() for getting memory usage info
+#		if i % 10000 == 0:
+#			print('calling ranksum:'+str(i))
+#			t = time.localtime()
+#			current_time = time.strftime("%H:%M:%S", t)
+#			print(current_time)
+#			print('Memory:')
+#			process = psutil.Process(os.getpid())
+#			print(process.memory_info().rss)
+#			sys.stdout.flush()
 		p2 = mannwhitneyu(mm_in,mm_out,use_continuity=True,alternative='greater')
 		p = p2[1]
 		bpm_local_tmp.append(p)
@@ -200,44 +209,14 @@ def snp_permutation_parallel(perm_args):
 	count_path = np.zeros(np.sum(ind2keep_path))
 
 
-	print('share='+str(share))
 	gc.collect()
 	for perm in range(share):
-		print('perm='+str(perm))
-		t = time.localtime()
-		current_time = time.strftime("%H:%M:%S", t)
-		print(current_time)
-		sys.stdout.flush()
-		#arr = np.random.permutation(s)
 		mmtmp = mmtmp[:,np.random.permutation(mmtmp.shape[1])]
-		#mmtmp = np.array(mmtmp.tolist())
-		#np.random.shuffle(mmtmp.T)
-		print('mm shuffled')
-		t = time.localtime()
-		current_time = time.strftime("%H:%M:%S", t)
-		print(current_time)
-		sys.stdout.flush()
 		sumMMtmp = np.sum(mmtmp,axis=0)
 		bpmsum_tmp = np.zeros(bpmind1.shape[0])
-		#print('starting bpm for loop:'+str(bpmind1.shape[0]))
-		print(mmtmp.shape)
-		t = time.localtime()
-		current_time = time.strftime("%H:%M:%S", t)
-		print(current_time)
-		sys.stdout.flush()
 		d1 = 0
 		d2 = 0
 		for i in range(bpmind1.shape[0]):
-			if i % 10000 == 0:
-				print('in thread:'+str(perm_args.id) + ' bpmsum for '+str(i))
-				t = time.localtime()
-				current_time = time.strftime("%H:%M:%S", t)
-				print(current_time)
-				process = psutil.Process(os.getpid())
-				print(d1)
-				print(d2)
-				print(process.memory_info().rss)
-				sys.stdout.flush()
 			t1 = datetime.datetime.now()
 			id1 = np.array(bpmind1[i])
 			id2 = np.array(bpmind2[i])
@@ -250,18 +229,11 @@ def snp_permutation_parallel(perm_args):
 				bpmsum_tmp[i] = 0
 			else:
 				t1 = datetime.datetime.now()
-				#bpmsum_tmp[i] = np.matmul(xs1[:,p1].T,np.matmul(mmtmp,xs2[:,p2]))
-				#bpmsum_tmp[i] = np.sum(mmtmp[id1,:][:,id2])
 				bpmsum_tmp[i] = cyadd.csum(mmtmp,id1,id2)
 				t2 = datetime.datetime.now()
 				dt = t2 - t1
 				d2 = d2 + dt.total_seconds() * 1000
 		count_bpm = count_bpm + (bpmsum_tmp > bpmsum[ind2keep_bpm])
-		print('count_bpm computed')
-		t = time.localtime()
-		current_time = time.strftime("%H:%M:%S", t)
-		print(current_time)
-		sys.stdout.flush()
 		## wpm permutation
 		wpmsum_tmp = np.zeros(wpmind.shape[0])
 		for i in range(wpmind.shape[0]):
@@ -269,15 +241,8 @@ def snp_permutation_parallel(perm_args):
 			#wpmsum_tmp[i] = np.sum(mmtmp[id1,:][:,id1])
 			wpmsum_tmp[i] = cyadd.csum(mmtmp,id1,id1)
 		count_wpm = count_wpm + (wpmsum_tmp > wpmsum[ind2keep_wpm])
-		print('count_wpm computed')
-		t = time.localtime()
-		current_time = time.strftime("%H:%M:%S", t)
-		print(current_time)
-		sys.stdout.flush()
 		## path degree permutation
 		path_degree_tmp = np.zeros(pathind.shape[0])
-		print('num of paths: ' +str(pathind.shape[0]))
-		sys.stdout.flush() 
 		for i in range(pathind.shape[0]):
 			id1 = np.array(pathind[i])
 			dist_in = sumMMtmp[id1]
@@ -288,11 +253,6 @@ def snp_permutation_parallel(perm_args):
 			p = p2[1] 
 			path_degree_tmp[i] =  -1 * np.log10(p)
 		count_path = count_path + (path_degree_tmp > path_degree[ind2keep_path])
-		print('count_path computed')
-		t = time.localtime()
-		current_time = time.strftime("%H:%M:%S", t)
-		print(current_time)
-		sys.stdout.flush()
 	return count_bpm,count_wpm,count_path
 
 
@@ -311,10 +271,8 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 	## - binary_flag: flag to make the interaction network binary
 
 	mm = input_network
-	print(mm.shape)
 	s = mm.shape[0]
 	bpm_size = bpm['size'].values.shape[0]
-	print('bpm size = ' + str(bpm_size)) 
 	bpmsize = bpm['size'].values
 	ind1 = bpm['ind1'].values
 	ind2 = bpm['ind2'].values
@@ -322,8 +280,6 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 	bpmind2size = bpm['ind2size'].values
 
 	wpm_size = wpm['size'].values.shape[0]
-	print('wpm size = ' + str(wpm_size))
-	sys.stdout.flush()
 	wpmsize = wpm['size'].values
 	wpmindsize = wpm['indsize'].values
 	ind = wpm['ind'].values
@@ -333,11 +289,6 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 		mm[mm>=0.2] = 1
 		mm[mm<1] = 0
 	sumMM = np.sum(mm,1)
-	print('sum computed')
-	t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	print(current_time)
-	sys.stdout.flush()
 	### BPM binary chi2
 	# bpm genetic interaction counts
 	tr = []
@@ -345,23 +296,11 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 	for i in range(bpm_size):
 		id1 = np.array(ind1[i])
 		id2 = np.array(ind2[i])
-		#print(i)
-		#print('---')
-		#print(id1)
-		#print('---')
-		#print(id2)
-		#print(type(id1[0])) 
-		sys.stdout.flush()
-		#if i==55:
-		#	print('hi')
-		#	print(id1.shape[0])
-		#	print(id2.shape[0])
-		#	sys.stdout.flush()
 		if id1.shape[0] < 5 or id2.shape[0] < 5:
 			tr.append(i)
 			continue
 		bpmgi[i] = np.sum(mm[id1,:][:,id2])
-		# bpm background interactions
+	# bpm background interactions
 	path1bggi = np.zeros(bpm_size)
 	path2bggi = np.zeros(bpm_size)
 	for i in range(bpm_size):
@@ -389,17 +328,11 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 	path1notgi = path1bgsize - path1bggi - bpmsize
 	path2notgi = path2bgsize - path2bggi - bpmsize
 
-	print('bpm computation done')
-	t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	print(current_time)
-	sys.stdout.flush()
 	# call chi2
 	## build the tables
 	table1 = np.stack((bpmgi,path1bggi,bpmnotgi,path1notgi))
 	table1 = table1.transpose()
 	table1[tr,:] = 5
-	print(np.where(table1<1))
 	sys.stdout.flush()
 	table2 = np.stack((bpmgi,path2bggi,bpmnotgi,path2notgi))
 	table2 = table2.transpose()
@@ -412,11 +345,6 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 	chi2_bpm_1[tr] = 0
 	chi2_bpm_2[tr] = 0
 
-	print('chi2 called and returned')
-	t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	print(current_time)
-	sys.stdout.flush()
 	## consider under-enriched chi2s
 	chi2_bpm_1[bpmgi/(bpmgi + bpmnotgi) < path1bggi / (path1bggi+path1notgi)] = -1 * chi2_bpm_1[bpmgi/(bpmgi + bpmnotgi) < path1bggi / (path1bggi+path1notgi)]
 	chi2_bpm_2[bpmgi/(bpmgi + bpmnotgi) < path2bggi / (path2bggi+path2notgi)] = -1 * chi2_bpm_2[bpmgi/(bpmgi + bpmnotgi) < path2bggi / (path2bggi+path2notgi)]
@@ -474,29 +402,16 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 	wpm_table = np.stack((wpmgi,pathbggi,wpmnotgi,pathbgnotgi))
 	wpm_table = wpm_table.transpose()
 
-	print('wpm cmputation done')
-	t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	print(current_time)
-	sys.stdout.flush()
 
 	## call chi2
 	chi2_wpm = call_chi2(wpm_table)
 	chi2_wpm = np.log10(chi2_wpm) * -1
-	print('wpm chi returned')
-	t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	print(current_time)
-	sys.stdout.flush()
 
 	## consider under-enriched chi2s
 	chi2_wpm[wpmgi/(wpmgi + wpmnotgi) < pathbggi / (pathbggi+pathbgnotgi)] = -1 * chi2_wpm[wpmgi/(wpmgi + wpmnotgi) < pathbggi / (pathbggi+pathbgnotgi)]
 	ind2keep_wpm = (chi2_wpm >= -1 * np.log10(0.1))
 	wpmind = ind[ind2keep_wpm]
 	gc.collect()
-	process = psutil.Process(os.getpid())
-	print('chi2 part done. Memory used:')
-	print(process.memory_info().rss)
 	
 
 
@@ -532,14 +447,10 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 		wpmsum[ind2keep_wpm] = wpmsum_tmp
 
 	else:
-		print('number of bpms to check for ranksum')
-		print(bpmind1.shape)
-		sys.stdout.flush()
 		## restore non-binary mm
 		mm = mm_stored
 		## ranksum test
 		bpm_local_tmp = np.zeros(bpmind1.shape[0])
-		#bpmsum_tmp = np.zeros(bpmind1.shape[0])
 		bpmsum = np.zeros(ind1_new.shape[0])
 		density_bpm = np.zeros(ind1_new.shape[0])
 		# parallel run for computing ranksum
@@ -568,15 +479,10 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 		tr = []
 		for i in range(n_workers):
 			bpmsum_tmp = bpmsum_tmp + results[i][0]
-			print(len(bpmsum_tmp))
-			sys.stdout.flush()
 			bpm_tmp = bpm_tmp + results[i][1]
 			tr = tr + results[i][2]
 		bpmsum_tmp = np.array(bpmsum_tmp)
 		bpm_local_tmp = np.array(bpm_tmp)
-		print('bpm_local_tmp built')
-		print(bpm_local_tmp.shape)
-		sys.stdout.flush()
 
 		
 		bpm_local_tmp[tr] = 1
@@ -611,16 +517,11 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 		ind2keep_wpm = (wpm_local >= -1 * np.log10(0.05)) 
 
 	gc.collect()
-	print('rank sum part done. Memory used:')
-	print(process.memory_info().rss)
-	sys.stdout.flush()
 	## compute expected bpm density
 	sumMM = np.sum(mm,1)
 	bpmind1 = ind1_new[ind2keep_bpm]
 	bpmind2 = ind2_new[ind2keep_bpm]
 	density_bpm_expected = np.zeros(ind1_new.shape[0])
-	print('debug')
-	print(ind1_new.shape[0])
 	for i in range(ind1_new.shape[0]):
 		id1 = np.array(ind1_new[i])
 		if id1.shape[0] == 0:
@@ -639,11 +540,6 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 		density_wpm_expected[i] = np.sum(sumMM[id1]) / (s * len(ind[i]) )
 
 	## path degree
-	print('computing path degree')
-	t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	print(current_time)
-	sys.stdout.flush()
 	path_degree = np.zeros(wpm_size)
 	for i in range(wpm_size):
 		id1 = np.array(ind[i])
@@ -708,11 +604,6 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 	count_bpm = np.zeros(bpmind1.shape[0])
 	count_wpm = np.zeros(wpmind.shape[0])
 	count_path = np.zeros(np.sum(ind2keep_path))
-	print('starting snp permutation:' + str(snpPerms))
-	#t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	print(current_time)
-	sys.stdout.flush()
 	mmtmp = mm
 	mmtmp  = np.ctypeslib.as_ctypes(mm)
 	shared_mm = sharedctypes.RawArray(mmtmp._type_, mmtmp)
@@ -740,11 +631,6 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 		count_wpm = count_wpm + results[proc][1]
 		count_path = count_path + results[proc][2]
 
-	print('snp perm done')
-	t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	print(current_time)
-	sys.stdout.flush()
 
 
 	bpm_local_pv[ind2keep_bpm] = (count_bpm + 1) / snpPerms
