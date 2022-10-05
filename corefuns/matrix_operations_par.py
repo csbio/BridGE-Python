@@ -411,7 +411,7 @@ def run(model,alpha1,alpha2,n_workers,R):
 
 # if the disease model is combined, this function is called and it calls run() itself
 def combine(alpha1,alpha2,n_workers,R):
-	output_name = 'data/ssM_hygessi_'+ 'combined_R'+str(R) + '.pkl'
+	output_name = 'data/ssM_mhygessi_'+ 'combined_R'+str(R) + '.pkl'
 	## run for 3 models
 	run('RR',alpha1,alpha2,n_workers,R)
 	run('RD',alpha1,alpha2,n_workers,R)
