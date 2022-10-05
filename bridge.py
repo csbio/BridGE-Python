@@ -144,7 +144,7 @@ if __name__ == '__main__':
 			ssmfile = 'data/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
 		gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers)
 
-	elif job == 'Analysis':
+	elif job == 'ComputeFDR':
 		bpmfile = 'data/BPMind.pkl'
 		if not path.exists(bpmfile):
 			sys.exit('data/BPMind.pkl not found')
