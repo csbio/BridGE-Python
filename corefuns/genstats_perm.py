@@ -22,7 +22,6 @@ import os, psutil
 import copy
 import datetime
 
-genstats(ssmfile,bpmfile,binary_flag,snpPerms,minPath,n_workers,netDensity=0):
 # genstats() computes BPM/WPM/PATH statistics. Can be run parallel.
 #
 # INPUTS:
