@@ -4,14 +4,33 @@ from corefuns import check_BPM_WPM_redundancy as cbwr
 from classes import fdrresultsclass
 from classes import bpmindclass
 from corefuns import get_interaction_pair as gpair
-import sys
-import datetime
 
-def time_log():
-    print(datetime.datetime.now())
-    sys.stdout.flush()
 
-def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenemappingfile,validationfile=None):
+# collectresults() is responsible for collecting and exporting the results to an Excel file. It also calls functions for finding driver genes and non-redundunt modules.
+#
+# INPUTS:
+#   resultsfile: Pickle file containing the FDR, empirical p-values, and ranksum scores of BPM/WPM/PATH modules.
+#   fdrcut: FDR threshold for keeping BPM/WPM/PATH modules. 
+#   ssmfile: Interaction network file(path to file) for real network in the pickle format.
+#   bpmindfile: files containing SNP ids for BPM/WPMs in pickle format.
+#   snppathwayfile: Pickle file containing mapping of SNPs to pathways.
+#   snpgenemappingfile: Pickle file containing mapping of SNPs to Genes.
+#
+# OUTPUTS:
+#   output_results_<ssmFile without extension>.xls - This Excel file has the following pages:
+#       - output_discovery_summary: summary of findings(numbers of) for BPM/WPM/PATH
+#       - output_noRD_discovery_summary: summary of non-redundant findings(numbers of) for BPM/WPM/PATH 
+#       - output_bpm_table: Table of the all BPMs with FDR below fdrcut with all the stats and driver genes 
+#       - BPM_redundant_groups: Table connecting redundunt BPM modules for different FDR thresholds
+#       - output_wpm_table: Table of the all WPMs with FDR below fdrcut with all the stats and driver genes 
+#       - WPM_redundant_groups: Table connecting redundunt WPM modules for different FDR thresholds
+#       - output_path_table: Table of the all PATHs with FDR below fdrcut with all the stats and driver genes 
+#       - PATH_redundant_groups: Table connecting redundunt PATH modules for different FDR thresholds
+# 
+
+
+
+def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenemappingfile):
 
     pklin = open(resultsfile,"rb")
     rfd = pickle.load(pklin)
@@ -30,19 +49,16 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
 
 
     if not ind_bpm.empty:
-        print('bpm_check')
         fdrBPM = fdrBPM.iloc[ind_bpm.index]
         bpm_pv_discovery = bpm_pv.iloc[ind_bpm.index]
         bpm_ranksum_discovery = bpm_ranksum.iloc[ind_bpm.index]
 
     if not ind_wpm.empty:
-        print('wpm_check')
         fdrWPM = fdrWPM.iloc[ind_wpm.index]
         wpm_pv_discovery = wpm_pv.iloc[ind_wpm.index]
         wpm_ranksum_discovery = wpm_ranksum.iloc[ind_wpm.index]
 
     if  not ind_path.empty:
-        print('Path check')
         fdrPATH = fdrPATH.iloc[ind_path.index]
         path_pv_discovery = path_pv.iloc[ind_path.index]
         path_ranksum_discovery = path_ranksum.iloc[ind_path.index]
@@ -62,10 +78,6 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
         for i in range(pathway_size):
             p = bpm.wpm['pathway'][i]
             path_ids[p] = i
-
-
-
-
 
         if not ind_bpm.empty:
             path1 = bpm.bpm['path1names']
@@ -128,8 +140,6 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
             eff_path = pd.DataFrame(eff_path, columns=['eff_path'])
             # print(eff_path)
 
-    print('calling check redundancy...')
-    time_log()
     BPM_nosig_noRD,WPM_nosig_noRD,PATH_nosig_noRD,BPM_group_tmp,WPM_group_tmp,PATH_group_tmp = cbwr.check_BPM_WPM_redundancy(fdrBPM, fdrWPM, fdrPATH, bpmindfile, 0.4)
 
     if not ind_bpm.empty:
@@ -164,12 +174,7 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
         output_bpm_table = pd.concat(results, axis=1, sort=False)
 
 
-        
-
-
-
     if not ind_wpm.empty:
-
         ### resuls for redundant groups
         p1,fdr_c,fdrs,g = [],[],[],[]
         for i in range(len(WPM_group_tmp)):
@@ -182,7 +187,6 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
                 g.append(int(WPM_group_tmp[i][x]))
                 p1.append(path_wpm.loc[wpms.iloc[x].name]['pathway'])
                 
-
         d = {'Pathway': p1, 'FDR cut': fdr_c, 'FDR': fdrs, 'Group': g }
         output_WPM_groups_table = pd.DataFrame(data=d)
 
