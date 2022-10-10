@@ -155,8 +155,7 @@ if __name__ == '__main__':
 		if not path.exists(ssmfile):
 			sys.exit(ssmfile+' not found')
 		fdr.fdrsampleperm(ssmfile, bpmfile, pval_cutoff, minPath, sample_perms)
-	elif job == 'collect':
-		print('collecting the results...')
+	elif job == 'Summarize':
 		bpmfile = 'data/BPMind.pkl'
 		#snppathwayfile = 'data/snp_pathway_min10_max300.pkl'
 		#snpgenemappingfile  = 'data/snpgenemapping_50kb.pkl'

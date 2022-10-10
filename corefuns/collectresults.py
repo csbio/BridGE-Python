@@ -12,7 +12,7 @@ from corefuns import get_interaction_pair as gpair
 #   resultsfile: Pickle file containing the FDR, empirical p-values, and ranksum scores of BPM/WPM/PATH modules.
 #   fdrcut: FDR threshold for keeping BPM/WPM/PATH modules. 
 #   ssmfile: Interaction network file(path to file) for real network in the pickle format.
-#   bpmindfile: files containing SNP ids for BPM/WPMs in pickle format.
+#   bpmindfile: file containing SNP ids for BPM/WPMs in pickle format.
 #   snppathwayfile: Pickle file containing mapping of SNPs to pathways.
 #   snpgenemappingfile: Pickle file containing mapping of SNPs to Genes.
 #

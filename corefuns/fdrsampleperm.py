@@ -10,7 +10,7 @@ from classes import Stats
 #
 # INPUTS:
 #   ssmFile: Interaction networks file(path to file) in the pickle format.
-#   BPMindFile: files containing SNP ids for BPM/WPMs in pickle format.
+#   BPMindFile: file containing SNP ids for BPM/WPMs in pickle format.
 #   pcut: p-value cutoff for BPM/WPM/PATH to be considered significant and to be in FDR computing process
 #   minPath: minimum size for a pathway to be considered as WPM and in BPM.
 #   N: Number of random networks

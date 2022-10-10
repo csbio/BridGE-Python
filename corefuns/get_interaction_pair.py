@@ -15,12 +15,27 @@ from classes import SNPdataclass
 from classes import InteractionNetwork
 from classes import genesetdataclass
 from corefuns import hygetest as ht
-import sys
-import datetime
 
-def time_log():
-	print(datetime.datetime.now())
-	sys.stdout.flush()
+
+# get_interaction_pair() finds driver SNPs and genes for BPMs, WPMs. Figures out BPM or WPM by comparing path1 and path2 names.
+#
+# INPUTS:
+#   n: Number of BPMs/WPMs provided to the function.
+#	path1: Names of pathway1 in BPMs/WPMs
+#	path2: Names of pathway2 in BPMs (same as path1 for WPMs)
+#	effects: array of 'risk'/'protective' indicating the interaction type
+#   bpmfile: file containing SNP ids for BPM/WPMs in pickle format.
+#   snp2pathwayfile: Pickle file containing mapping of SNPs to pathways.
+#   snp2genefile: Pickle file containing mapping of SNPs to Genes.
+#	path_ids: a map of pathway names to their id in the dataset, made in collectresults function
+#
+# OUTPUTS:
+#   returns an array containing 3 data frames
+#       - bpm_path1_drivers: driver SNPs(abd their mapped gene) for pathway1 in BPM
+#       - bpm_path2_drivers: driver SNPs(abd their mapped gene) for pathway2 in BPM
+#       - wpm_path_drivers: driver SNPs(abd their mapped gene) for pathway with WPM
+# 
+
 
 
 def hygetest_caller(input_row):
@@ -28,14 +43,10 @@ def hygetest_caller(input_row):
 
 
 def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,snp2genefile,path_ids):
-	print('retrieve driver SNP interactions...')
-	time_log()
 	pklin = open(snp2genefile,'rb')
 	snp2gene = pickle.load(pklin)
-	#print(snp2gene)
 	pklin = open(snp2pathwayfile,'rb')
 	snp2path = pickle.load(pklin)
-	#print(snp2path.spmatrix)
 
 	## only for testing 
 	geneset_file = snp2path.geneset
@@ -112,7 +123,6 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		ind2_snp = snpdataAR.rsid[ind2].values
 
 		## find all genes for the 2 pathways from the geneset(index)
-
 		tmp = geneset.gpmatrix[pathname1]
 		ind1_gp = tmp[tmp==1].index.values
 		tmp = geneset.gpmatrix[pathname2]
@@ -125,7 +135,6 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		ind2_gp_updated = np.intersect1d(ind2_gp,all_genes)
 
 		## remove snps in pathways which are not in the snp2gene
-
 		all_snps = snp2gene.index.values
 		ind1_snp_updated = np.intersect1d(ind1_snp,all_snps)
 		ind2_snp_updated = np.intersect1d(ind2_snp,all_snps)
