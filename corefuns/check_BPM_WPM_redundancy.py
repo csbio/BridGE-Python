@@ -4,12 +4,29 @@ import pickle
 from corefuns import bpmsim as bpmsim
 from corefuns import pathsim as pathsim
 from scipy import sparse
-import sys
-import datetime
 
-def time_log():
-    print(datetime.datetime.now())
-    sys.stdout.flush()
+
+
+
+# check_BPM_WPM_redundancy() finds redundant BPM/WPM/PATHs and group the similar ones into redundant groups for different FDR thresholds.
+#
+# INPUTS:
+#   fdrBPM: A dataframe contating the information(FDR,pathway names, etc) about BPMs that passed general FDR threshold 
+#   fdrWPM: A dataframe contating the information(FDR,pathway names, etc) about WPMs that passed general FDR threshold 
+#   fdrPATH: A dataframe contating the information(FDR,pathway names, etc) about PATHs that passed general FDR threshold 
+#   bpmindfile: file containing SNP ids for BPM/WPMs in pickle format.
+#   FDRcut: Maximum FDR threshold.
+#
+# OUTPUTS:
+#   returns an array containing 6 lists
+#       - BPM_nosig_noRD: List containing number of non-redundant BPMs for each FDR threshold(incremented by 0.05)
+#       - WPM_nosig_noRD: List containing number of non-redundant WPMs for each FDR threshold(incremented by 0.05)
+#       - PATH_nosig_noRD: List containing number of non-redundant PATHs for each FDR threshold(incremented by 0.05)
+#       - BPM_group: List of multiple lists each containing redundant group membership indices for BPMs in the same order as fdrBPM.
+#       - WPM_group: List of multiple lists each containing redundant group membership indices for WPMs in the same order as fdrwPM.
+#       - PATH_group: List of multiple lists each containing redundant group membership indices for PATHs in the same order as fdrPATH.
+# 
+
 
 def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
     pklin = open(bpmindfile,"rb")
@@ -22,8 +39,6 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
     start = 0.05
     increment = 0.05
-   
-    print('in check redundancy...')
 
     # Adding increment to FDRcut for inclusive arange.
     for fdrcut in np.arange(start, FDRcut+increment, increment):
@@ -221,7 +236,6 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
         group, PATH_sim, noRD = [0]*2, [0]*2, [0]*2
 
-        print('processing paths')
         # Should ind have more than one row
         if len(ind1) > 1:
             wpm_ind_ind1 = bpmind.wpm['ind'][ind1]
