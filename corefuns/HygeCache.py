@@ -3,6 +3,14 @@ import math
 import pandas as pd
 from corefuns import hygetest as ht
 
+
+# HygeCache class is for computing bulk hypergeometric tests.
+# apply_hyge() function is called for computing multipe hypergeometric tests. Sample size, and case/control size is set when creating the object.
+# INPUTS:
+#	- g: genotype group size(sepcific class we're interested in draw)
+#	- x: number of samples with specific genotype in case/control group
+#	- case_flag: flag indicating which of the case_size or control_size is used.
+
 class HygeCache:
 	def __init__(self,sample_size,case_size,control_size):
 		self.sample_size = sample_size

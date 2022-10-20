@@ -2,6 +2,22 @@ import pandas as pd
 import numpy as np
 from scipy.spatial.distance import squareform
 
+
+
+# bpm() computes similarity between two sets of BPMs to find redundant BPMs.  
+#   If the two sets are similar, similarity between the BPMs in the set is computed.
+#
+# INPUTS:
+#   BPMind1x: A dataframe contating first pathways in BPM in the first set(x)
+#   BPMind2x: A dataframe contating second pathways in BPM in the first set(x)
+#   BPMind1y: A dataframe contating first pathways in BPM in the second set(y)
+#   BPMind2y: A dataframe contating second pathways in BPM in the second set(y)
+#
+# OUTPUTS:
+#   returns a matrix with entries equal to similarity between the BPM in the row and the BPM in the column.
+# 
+
+
 def bpmsim(BPMind1x, BPMind2x, BPMind1y, BPMind2y):
 
     t1 = len(BPMind1x)

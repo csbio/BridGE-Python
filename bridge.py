@@ -99,6 +99,8 @@ if __name__ == '__main__':
 			sys.exit('genesets do not exist')
 		## prepare gene set information
 		msig2p.msigdb2pkl(symbolsFile, entrezFile)
+		print('geneset files processed')
+		sys.stdout.flush()
 		if not path.exists(gene_annotation):
 			sys.exit('gene annotation file not found')
 		sgmFile = 'snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
