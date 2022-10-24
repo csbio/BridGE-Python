@@ -27,10 +27,11 @@ if [[ $(wc -l <${PlinkFile}.genome) -ge 2 ]];then
      if [ ! -f related_subject2remove.txt ]; then
           rm related_subject2remove.txt
      fi
-     python3 scripts/removerelatedindividual.py ${PlinkFile}.genome ${pi_hat}
+     python3 $PYTHONPATH/removerelatedindividual.py ${PlinkFile}.genome ${pi_hat}
      plink --bfile ${PlinkFile} --remove related_subject2remove.txt --allow-no-sex --make-bed --out ${OutputFile} > /dev/null
 else
      # no need to remove any individuals
      plink --bfile ${PlinkFile} --allow-no-sex --make-bed --out ${OutputFile} > /dev/null
 fi
 rm ${PlinkFile}_pruned_tmp*
+rm related_subject2remove.txt
