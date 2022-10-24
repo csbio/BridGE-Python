@@ -19,6 +19,13 @@ import sys
 
 def bpmind(snpPathwayFile):
 
+
+    # find project directory
+    p_dir = snpPathwayFile.split('/')
+    s = '/'
+    project_dir = s.join(p_dir[0:-1])
+
+
     # Reading in pickle datafile
     pklin = open(snpPathwayFile,"rb")
     snpset = pickle.load(pklin)
@@ -83,6 +90,6 @@ def bpmind(snpPathwayFile):
     bpmobj = bpmc.bpmindclass(bpm, wpm)
 
     # Saving bpmind data to pickle file.
-    final = open('data/BPMind.pkl', 'wb')
+    final = open(project_dir+'/BPMind.pkl', 'wb')
     pickle.dump(bpmobj, final)
     final.close()

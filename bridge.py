@@ -20,6 +20,7 @@ if __name__ == '__main__':
 	# Default parameters defined
 	job = ''
 	plinkfile = ''
+	project_dir = 'data'
 	genesets='data/toy.genesets' 
 	gene_annotation = 'data/glist-hg19' 
 	mappingDistance = 50000
@@ -72,6 +73,9 @@ if __name__ == '__main__':
 				fdrcut = float(a)
 			elif o == '--snpPathFile':
 				snppathwayfile = a
+			elif o == '--projectDir':
+				project_dir = a
+
 
 
 	# First module: Data processing
@@ -91,8 +95,8 @@ if __name__ == '__main__':
 		finalfile = plinkfile + '.pkl'
 		p2p.plink2pkl(rawfile, bimfile, famfile, finalfile)
 		## converting snp data assuming different disease models
-		ba.bindataa(finalfile,'r')
-		ba.bindataa(finalfile,'d')
+		ba.bindataa(project_dir,finalfile,'r')
+		ba.bindataa(project_dir,finalfile,'d')
 		symbolsFile = genesets + '.symbols.gmt'
 		entrezFile = genesets + '.entrez.gmt'
 		if not path.exists(symbolsFile) or not path.exists(entrezFile):
@@ -118,14 +122,14 @@ if __name__ == '__main__':
 		## Validating input parameters
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
 			sys.exit('wrong model')
-		if not path.exists('data/SNPdataAD.pkl'):
-			sys.exit('data/SNPdataAD.pkl not found')
-		if not path.exists('data/SNPdataAR.pkl'):
-			sys.exit('data/SNPdataAR.pkl not found')
+		if not path.exists(project_dir+'/SNPdataAD.pkl'):
+			sys.exit(project_dir+'/SNPdataAD.pkl not found')
+		if not path.exists(project_dir+'/SNPdataAR.pkl'):
+			sys.exit(project_dir+'/SNPdataAR.pkl not found')
 		if model == 'combined':
-			ci.combine(alpha1,alpha2,n_workers,i)
+			ci.combine(project_dir,alpha1,alpha2,n_workers,i)
 		else:
-			ci.run(model,alpha1,alpha2,n_workers,i)
+			ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
 
 	elif job == 'ComputeStats':
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):

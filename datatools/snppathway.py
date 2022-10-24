@@ -22,6 +22,14 @@ import pandas as pd
 
 def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
 
+
+
+    # find project directory
+    p_dir = dataFile.split('/')
+    s = '/'
+    project_dir = s.join(p_dir[0:-1])
+
+
     # Loading pickle files into objects
     pklin = open(dataFile,"rb")
     SNPdata = pickle.load(pklin)
@@ -71,7 +79,7 @@ def snppathway(dataFile,sgmFile,genesets,minPath,maxPath):
 
     # Preparing data and filename for pickle storage.
     snpset = snps.snpsetclass(pathways, spm, genesets)
-    outfilename = "data/snp_pathway_min"+str(minPath)+"_max"+str(maxPath)+".pkl"
+    outfilename = project_dir+"/snp_pathway_min"+str(minPath)+"_max"+str(maxPath)+".pkl"
 
     # Saving data to pickle file.
     final = open(outfilename, 'wb')

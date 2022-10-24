@@ -4,6 +4,7 @@ import numpy as np
 # BINDATAA binarize 012 format SNP data based on dominant/recessive assumptions.
 #
 # INPUTS:
+#   project_dir: directory of all the project files
 #   dataFile - name of the data file. This .mat file consists
 #       a structure array SNPdata with the following fields:
 #       - rsid:snp names
@@ -19,16 +20,16 @@ import numpy as np
 # OUTPUTS:
 #   a pickle file SNPdataA(D or R).pkl
 
-def bindataa(dataFile, expr):
+def bindataa(project_dir,dataFile, expr):
     # Checking expression flag to proceed as dominant or recessive (D or R).
     if expr == 'r' or expr == 'R':
         # If recessive, set 1s to 0s, 2s to 1s, and set appropriate filename.
         set1, set2 = 0, 1
-        filename = 'data/SNPdataAR.pkl'
+        filename = project_dir+'/SNPdataAR.pkl'
     elif expr == 'd' or expr == 'D':
         # If dominant, set 1s to 1s, 2s to 1s, and set appropriate filename.
         set1, set2 = 1, 1
-        filename = 'data/SNPdataAD.pkl'
+        filename = project_dir'/SNPdataAD.pkl'
     else:
         # Default case where expression provided was neither D or R
         print("Provide 'd'/'D' or 'r'/'R' to designate dominant/recessive.")

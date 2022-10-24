@@ -18,6 +18,7 @@ from classes import InteractionNetwork
 # matrix_operations_par computes the interaction network. The functions to call are run() and combine()
 #
 # INPUTS:
+#	project_dir: Project directory including all data files
 #	model: disease model, can be RR-DD-RD, for combining them, call combine() function instead of run()
 #	alpha1: maximum p-value threshold for p11 in combinations
 #	alpha2: minimum p-value threshold for p10, p01, p00 in combinations
@@ -287,14 +288,14 @@ def parallel_run(job_arg):
 	#end of function
 
 
-def run(model,alpha1,alpha2,n_workers,R):
+def run(project_dir,model,alpha1,alpha2,n_workers,R):
 	print('computing interacttion. R='+str(R)+' model = '+model)
 	## output name
-	output_name = 'data/ssM_mhygessi_'+ model+'_R'+str(R) + '.pkl'
+	output_name = project_dir+'/ssM_mhygessi_'+ model+'_R'+str(R) + '.pkl'
 	
 	# loading and reading SNP data
-	pkl_d = open('data/SNPdataAD.pkl','rb')
-	pkl_r = open('data/SNPdataAR.pkl','rb')
+	pkl_d = open(project_dir+'/SNPdataAD.pkl','rb')
+	pkl_r = open(project_dir+'/SNPdataAR.pkl','rb')
 	snpdata_d = pickle.load(pkl_d)
 	snpdata_r = pickle.load(pkl_r)
 	pkl_d.close()
@@ -410,17 +411,17 @@ def run(model,alpha1,alpha2,n_workers,R):
 
 
 # if the disease model is combined, this function is called and it calls run() itself
-def combine(alpha1,alpha2,n_workers,R):
-	output_name = 'data/ssM_mhygessi_'+ 'combined_R'+str(R) + '.pkl'
+def combine(project_dir,alpha1,alpha2,n_workers,R):
+	output_name = project_dir+'/ssM_mhygessi_'+ 'combined_R'+str(R) + '.pkl'
 	## run for 3 models
 	run('RR',alpha1,alpha2,n_workers,R)
 	run('RD',alpha1,alpha2,n_workers,R)
 	run('DD',alpha1,alpha2,n_workers,R)
 
 	## load results for 3 models
-	rr_file = 'data/ssM_mhygessi_'+ 'RR_R'+str(R) + '.pkl'
-	rd_file = 'data/ssM_mhygessi_'+ 'RD_R'+str(R) + '.pkl'
-	dd_file = 'data/ssM_mhygessi_'+ 'DD_R'+str(R) + '.pkl'
+	rr_file = project_dir+'/ssM_mhygessi_'+ 'RR_R'+str(R) + '.pkl'
+	rd_file = project_dir+'/ssM_mhygessi_'+ 'RD_R'+str(R) + '.pkl'
+	dd_file = project_dir+'/ssM_mhygessi_'+ 'DD_R'+str(R) + '.pkl'
 	pklin = open(rr_file,'rb')
 	rr_network = pickle.load(pklin)
 	pklin.close()
