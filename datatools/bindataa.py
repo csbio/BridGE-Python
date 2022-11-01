@@ -29,7 +29,7 @@ def bindataa(project_dir,dataFile, expr):
     elif expr == 'd' or expr == 'D':
         # If dominant, set 1s to 1s, 2s to 1s, and set appropriate filename.
         set1, set2 = 1, 1
-        filename = project_dir'/SNPdataAD.pkl'
+        filename = project_dir+'/SNPdataAD.pkl'
     else:
         # Default case where expression provided was neither D or R
         print("Provide 'd'/'D' or 'r'/'R' to designate dominant/recessive.")

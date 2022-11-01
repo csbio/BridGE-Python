@@ -134,38 +134,38 @@ if __name__ == '__main__':
 	elif job == 'ComputeStats':
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
 			sys.exit('wrong model')
-		bpmfile = 'data/BPMind.pkl'
+		bpmfile = project_dir+'/BPMind.pkl'
 		if not path.exists(bpmfile):
-			sys.exit('data/BPMind.pkl not found')
-		if not path.exists('data/SNPdataAD.pkl'):
-                	sys.exit('data/SNPdataAD.pkl not found')
-		if not path.exists('data/SNPdataAR.pkl'):
-                	sys.exit('data/SNPdataAR.pkl not found')
+			sys.exit(project_dir+'/BPMind.pkl not found')
+		if not path.exists(project_dir+'/SNPdataAD.pkl'):
+                	sys.exit(project_dir+'/SNPdataAD.pkl not found')
+		if not path.exists(project_dir+'/SNPdataAR.pkl'):
+                	sys.exit(project_dir+'/SNPdataAR.pkl not found')
 		if model == 'combined':
 			#ci.combine(alpha1,alpha2,n_workers,R)
 			# build ssM file name
-			ssmfile = 'data/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
+			ssmfile = project_dir+'/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
 		else:
 			#ci.run(model,alpha1,alpha2,n_workers,R)	
-			ssmfile = 'data/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
+			ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
 		gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers)
 
 	elif job == 'ComputeFDR':
-		bpmfile = 'data/BPMind.pkl'
+		bpmfile = project_dir+'/BPMind.pkl'
 		if not path.exists(bpmfile):
-			sys.exit('data/BPMind.pkl not found')
+			sys.exit(project_dir+'/BPMind.pkl not found')
 		if model == 'combined':
-			ssmfile = 'data/ssM_mhygessi_combined_R0.pkl'
+			ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
 		else:
-			ssmfile = 'data/ssM_mhygessi_' + model + '_R0.pkl'
+			ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R0.pkl'
 		if not path.exists(ssmfile):
 			sys.exit(ssmfile+' not found')
 		fdr.fdrsampleperm(ssmfile, bpmfile, pval_cutoff, minPath, sample_perms)
 	elif job == 'Summarize':
-		bpmfile = 'data/BPMind.pkl'
-		#snppathwayfile = 'data/snp_pathway_min10_max300.pkl'
+		bpmfile = project_dir+'/BPMind.pkl'
+		snppathwayfile = project_dir+ '/' + snppathwayfile
 		#snpgenemappingfile  = 'data/snpgenemapping_50kb.pkl'
-		snpgenemappingfile = 'data/snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
+		snpgenemappingfile = project_dir+'/snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
 		validationfile = None
 		if not path.exists(bpmfile):
 			sys.exit('bpm file not found at:'+bpmfile)
@@ -174,13 +174,13 @@ if __name__ == '__main__':
 		if not path.exists(snpgenemappingfile):
 			sys.exit('snpgenemappingfile not found, check mapping Distance arg')
 		if model == 'combined':
-			ssmfile = 'data/ssM_mhygessi_combined_R0.pkl'
-			resultsfile = 'data/results_ssM_mhygessi_combined_R0.pkl'
+			ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
+			resultsfile = project_dir+'/results_ssM_mhygessi_combined_R0.pkl'
 		else:
-			ssmfile = 'data/ssM_mhygessi_' + model + '_R0.pkl'
-			resultsfile = 'data/results_ssM_mhygessi_'+model +'_R0.pkl'
+			ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R0.pkl'
+			resultsfile = project_dir+'/results_ssM_mhygessi_'+model +'_R0.pkl'
 		if not path.exists(ssmfile):
 			sys.exit('interaction file not found, check model arg')
 		if not path.exists(resultsfile):
 			sys.exit('results file from analysis module not found')
-		cl.collectresults(resultsfile,fdrcut,ssmfile,bpmfile,snppathwayfile,snpgenemappingfile,validationfile)
+		cl.collectresults(resultsfile,fdrcut,ssmfile,bpmfile,snppathwayfile,snpgenemappingfile)

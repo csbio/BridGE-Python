@@ -414,9 +414,9 @@ def run(project_dir,model,alpha1,alpha2,n_workers,R):
 def combine(project_dir,alpha1,alpha2,n_workers,R):
 	output_name = project_dir+'/ssM_mhygessi_'+ 'combined_R'+str(R) + '.pkl'
 	## run for 3 models
-	run('RR',alpha1,alpha2,n_workers,R)
-	run('RD',alpha1,alpha2,n_workers,R)
-	run('DD',alpha1,alpha2,n_workers,R)
+	run(project_dir,'RR',alpha1,alpha2,n_workers,R)
+	run(project_dir,'RD',alpha1,alpha2,n_workers,R)
+	run(project_dir,'DD',alpha1,alpha2,n_workers,R)
 
 	## load results for 3 models
 	rr_file = project_dir+'/ssM_mhygessi_'+ 'RR_R'+str(R) + '.pkl'

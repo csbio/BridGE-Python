@@ -169,7 +169,8 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		ind1_gene = np.array(ind1_gene)
 		ind2_gene = np.array(ind2_gene)
 		ssm_dis = ssm[ind1,:][:,ind2]
-		m_id = max_id[ind1,:][:,ind2]
+		if model == 'combined': 
+			m_id = max_id[ind1,:][:,ind2]
 		if p_id1 == p_id2:
 			tmp_dis = np.tril(ssm_dis)
 		else:
@@ -203,9 +204,9 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	
 		for k in range(interaction_pairs):
 			GI[k] = ssm_dis[i[k],j[k]]
-			dm = m_id[i[k],j[k]] # disease model with maximum interaction in combined model
 			tmp_model = model
 			if model == 'combined':
+				dm = m_id[i[k],j[k]] # disease model with maximum interaction in combined model
 				if dm == 1: ## RR	
 					tmp_model = 'RR'
 				elif dm == 2: # DD
