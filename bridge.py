@@ -87,18 +87,18 @@ if __name__ == '__main__':
 		## convert plinkfile to pickle
 		if plinkfile == '':
 			sys.exit('plinkFile not provided')
-		rawfile = plinkfile + '.raw'
-		bimfile = plinkfile + '.bim'
-		famfile = plinkfile + '.fam'
+		rawfile = project_dir + '/' + plinkfile + '.raw'
+		bimfile = project_dir + '/' + plinkfile + '.bim'
+		famfile = project_dir + '/' + plinkfile + '.fam'
 		if not path.exists(rawfile) or not path.exists(bimfile) or not path.exists(famfile):
 			sys.exit('plinkFiles do not exist')
-		finalfile = plinkfile + '.pkl'
+		finalfile = project_dir + '/' + plinkfile + '.pkl'
 		p2p.plink2pkl(rawfile, bimfile, famfile, finalfile)
 		## converting snp data assuming different disease models
 		ba.bindataa(project_dir,finalfile,'r')
 		ba.bindataa(project_dir,finalfile,'d')
-		symbolsFile = genesets + '.symbols.gmt'
-		entrezFile = genesets + '.entrez.gmt'
+		symbolsFile = project_dir + '/' + genesets + '.symbols.gmt'
+		entrezFile = project_dir + '/'+ genesets + '.entrez.gmt'
 		if not path.exists(symbolsFile) or not path.exists(entrezFile):
 			sys.exit('genesets do not exist')
 		## prepare gene set information
