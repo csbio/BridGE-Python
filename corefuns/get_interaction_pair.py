@@ -48,6 +48,8 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	pklin = open(snp2pathwayfile,'rb')
 	snp2path = pickle.load(pklin)
 
+
+
 	## only for testing 
 	geneset_file = snp2path.geneset
 	pklin = open(geneset_file,'rb')
@@ -56,11 +58,17 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	pklin = open(bpmfile,'rb')
 	bpm = pickle.load(pklin)
 
+	# Find project dir
+	dir_sp = snp2pathwayfile.split('/')
+	s = '/'
+	project_dir = s.join(dir_sp[:-1])
+
+
 	## load snp data
-	pklin = open('data/SNPdataAD.pkl','rb')
+	pklin = open(project_dir+'/SNPdataAD.pkl','rb')
 	snpdataAD = pickle.load(pklin)
 
-	pklin = open('data/SNPdataAR.pkl','rb')
+	pklin = open(project_dir+'/SNPdataAR.pkl','rb')
 	snpdataAR = pickle.load(pklin)
 
 	#load interaction network

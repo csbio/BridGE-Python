@@ -103,7 +103,7 @@ if __name__ == '__main__':
 			sys.exit('genesets do not exist')
 		## prepare gene set information
 		msig2p.msigdb2pkl(symbolsFile, entrezFile)
-		print('geneset files processed')
+		gene_annotation	= project_dir +	'/' + gene_annotation
 		sys.stdout.flush()
 		if not path.exists(gene_annotation):
 			sys.exit('gene annotation file not found')
@@ -115,7 +115,7 @@ if __name__ == '__main__':
 		## build relationship between snps and genes
 		snp2gene.mapsnp2gene(bimfile, gene_annotation, mappingDistance, 'matrix', sgmfile) # matrix mode - #change
 		## extract snp-pathway information
-		geneset_pkl = genesets + '.pkl'
+		geneset_pkl = project_dir + '/' + genesets + '.pkl'
 		outfile = snpp.snppathway(finalfile, sgmfile, geneset_pkl, minPath, maxPath)
 		bpm.bpmind(outfile)
 	elif job == 'ComputeInteraction':

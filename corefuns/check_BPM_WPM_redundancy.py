@@ -244,7 +244,7 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
             TTT = (PATH_sim[0]>=0.25).astype(int)
             #noRD[0], group[0] = sparse.csgraph.connected_components(TTT)
             tmp_ind = ind1
-            fdrs = fdrWPM.loc[tmp_ind]['wpm2']
+            fdrs = fdrPATH.loc[tmp_ind]['path2']
             tmp_idx = fdrs.argsort(kind = 'stable').to_numpy()
             fdrs_sorted = fdrs.iloc[tmp_idx]
             ## search for group and assign
@@ -280,7 +280,7 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
             TTT = (PATH_sim[1]>=0.25).astype(int)
             #noRD[1], group[1] = sparse.csgraph.connected_components(TTT)
             tmp_ind = ind2 + len(bpmind.wpm['size'])
-            fdrs = fdrWPM.loc[tmp_ind]['wpm2']
+            fdrs = fdrPATH.loc[tmp_ind]['path2']
             tmp_idx = fdrs.argsort(kind = 'stable').to_numpy()
             fdrs_sorted = fdrs.iloc[tmp_idx]
             ## search for group and assign
