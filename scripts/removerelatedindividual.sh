@@ -11,9 +11,10 @@ if [ -z "${PlinkFile}" ]; then echo "Plink file is not provided"; exit; fi
 if [ -z "${OutputFile}" ]; then echo "Output Plink file is not provided"; exit; fi	
 if [ -z "${pi_hat}" ]; then pi_hat=0.2; fi
 
+DIRPATH=$(dirname "$plinkFile")
 # LD prune before calculate IBD
 plink --bfile ${PlinkFile} --allow-no-sex --indep-pairwise 50 5 0.2
-plink --bfile ${PlinkFile} --extract plink.prune.in --allow-no-sex --make-bed --out ${PlinkFile}_pruned_tmp
+plink --bfile ${PlinkFile} --extract $DIRPATH/plink.prune.in --allow-no-sex --make-bed --out ${PlinkFile}_pruned_tmp
 
 # calculate IBD
 if [ ! -f ${PlinkFile}.genome ]; then
