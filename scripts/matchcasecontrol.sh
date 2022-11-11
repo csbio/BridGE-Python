@@ -6,6 +6,7 @@
 plinkFile=$1  # input plink file
 outputFile=$2 # new plink file with matched cases and controls 
 
+DIRPATH=$(dirname "$plinkFile")
 # compute ibd file
 if [ ! -f ${plinkFile}.genome ];
 then
@@ -27,10 +28,10 @@ do
 done
 mv ${plinkFile}.cluster2 ${plinkFile}.cluster2.orig
 mv cluster2.tmp  ${plinkFile}.cluster2 
-cat ${plinkFile}.cluster2  | awk '{print $1 "\t" $2 }' >  cluster2_subject2keep
+cat ${plinkFile}.cluster2  | awk '{print $1 "\t" $2 }' >  $DIRPATH/cluster2_subject2keep
 
 
-DIRPATH=$(dirname "$plinkFile")
+
 # generate new plink data
 plink --bfile ${plinkFile} --allow-no-sex --keep $DIRPATH/cluster2_subject2keep --make-bed --out ${outputFile}
 
