@@ -1,9 +1,11 @@
 import pandas as pd
+import numpy as np
 import pickle
 from corefuns import check_BPM_WPM_redundancy as cbwr
 from classes import fdrresultsclass
 from classes import bpmindclass
 from corefuns import get_interaction_pair as gpair
+from corefuns import pathway_map as pmap
 
 
 # collectresults() is responsible for collecting and exporting the results to an Excel file. It also calls functions for finding driver genes and non-redundunt modules.
@@ -145,6 +147,7 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
             # print(eff_path)
 
     BPM_nosig_noRD,WPM_nosig_noRD,PATH_nosig_noRD,BPM_group_tmp,WPM_group_tmp,PATH_group_tmp = cbwr.check_BPM_WPM_redundancy(fdrBPM, fdrWPM, fdrPATH, bpmindfile, 0.4)
+    pmap.draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_group_tmp) ## for drawing graph of BPMs/WPMs/PATHs
 
     if not ind_bpm.empty:
 
@@ -164,17 +167,28 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
         d = {'Pathway1': p1, 'Pathway2': p2, 'FDR cut': fdr_c, 'FDR': fdrs, 'Group': g }
         output_BPM_groups_table = pd.DataFrame(data=d)
 
+
+        bpms = fdrBPM[fdrBPM['bpm2'] <= fdrcut ]
+        bpms = bpms.sort_values(kind='stable',by='bpm2')
+        bpm_groups = np.array(BPM_group_tmp[-1],dtype=np.int64)
+        path1 = path1.reindex(index=bpms.index)
         path1 = path1.reset_index(drop = True)
+        path2 = path2.reindex(index=bpms.index)
         path2 = path2.reset_index(drop = True)
+        fdrBPM = fdrBPM.reindex(index=bpms.index)
         fdrBPM = fdrBPM.reset_index(drop = True)
+        bpm_size = bpm_size.reindex(index=bpms.index)
         bpm_size = bpm_size.reset_index(drop = True)
+        bpm_pv_discovery = bpm_pv_discovery.reindex(index=bpms.index)
         bpm_pv_discovery = bpm_pv_discovery.reset_index(drop = True)
+        bpm_ranksum_discovery= bpm_ranksum_discovery.reindex(index=bpms.index)
         bpm_ranksum_discovery = bpm_ranksum_discovery.reset_index(drop = True)
+        group_numbers = pd.DataFrame(data=bpm_groups,columns=['group'])
 
 
         fdrBPM = round(fdrBPM, 2)
         bpm_ranksum_discovery = round(bpm_ranksum_discovery, 2)
-        results = [path1,path2,fdrBPM,eff_bpm,bpm_size,bpm_pv_discovery,bpm_ranksum_discovery,bpm_path1_drivers,bpm_path2_drivers]
+        results = [path1,path2,group_numbers,fdrBPM,eff_bpm,bpm_size,bpm_pv_discovery,bpm_ranksum_discovery,bpm_path1_drivers,bpm_path2_drivers]
         output_bpm_table = pd.concat(results, axis=1, sort=False)
 
 
@@ -194,16 +208,25 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
         d = {'Pathway': p1, 'FDR cut': fdr_c, 'FDR': fdrs, 'Group': g }
         output_WPM_groups_table = pd.DataFrame(data=d)
 
+        wpms = fdrWPM[fdrWPM['wpm2'] <= fdrcut ]
+        wpms = wpms.sort_values(kind='stable',by='wpm2')
+        wpm_groups = np.array(WPM_group_tmp[-1],dtype=np.int64)
+        path_wpm = path_wpm.reindex(index=wpms.index)
         path = path_wpm.reset_index(drop = True)
+        fdrWPM = fdrWPM.reindex(index=wpms.index)
         fdrWPM = fdrWPM.reset_index(drop = True)
+        wpm_size = wpm_size.reindex(index=wpms.index)
         wpm_size = wpm_size.reset_index(drop = True)
+        wpm_pv_discovery = wpm_pv_discovery.reindex(index=wpms.index)
         wpm_pv_discovery = wpm_pv_discovery.reset_index(drop = True)
+        wpm_ranksum_discovery = wpm_ranksum_discovery.reindex(index=wpms.index)
         wpm_ranksum_discovery = wpm_ranksum_discovery.reset_index(drop = True)
+        group_numbers = pd.DataFrame(data=wpm_groups,columns=['group'])
 
 
         fdrWPM = round(fdrWPM, 2)
         wpm_ranksum_discovery = round(wpm_ranksum_discovery, 2)
-        results = [path,fdrWPM,eff_wpm,wpm_size,wpm_pv_discovery,wpm_ranksum_discovery,wpm_path_drivers]
+        results = [path,group_numbers,fdrWPM,eff_wpm,wpm_size,wpm_pv_discovery,wpm_ranksum_discovery,wpm_path_drivers]
         output_wpm_table = pd.concat(results, axis=1, sort=False)
 
     if not ind_path.empty:
@@ -224,16 +247,25 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
         d = {'Pathway': p1, 'FDR cut': fdr_c, 'FDR': fdrs, 'Group': g }
         output_PATH_groups_table = pd.DataFrame(data=d)
 
+        paths = fdrPATH[fdrPATH['path2'] <= fdrcut ]
+        paths = paths.sort_values(kind='stable',by='path2')
+        path_groups = np.array(PATH_group_tmp[-1],dtype=np.int64)
+        path_path = path_path.reindex(index=paths.index)
         path = path_path.reset_index(drop = True)
+        fdrPATH = fdrPATH.reindex(index=paths.index)
         fdrPATH = fdrPATH.reset_index(drop = True)
+        path_size = path_size.reindex(index=paths.index)
         path_size = path_size.reset_index(drop = True)
+        path_pv_discovery = path_pv_discovery.reindex(index=paths.index)
         path_pv_discovery = path_pv_discovery.reset_index(drop = True)
+        path_ranksum_discovery = path_ranksum_discovery.reindex(index=paths.index)
         path_ranksum_discovery = path_ranksum_discovery.reset_index(drop = True)
+        group_numbers = pd.DataFrame(data=path_groups,columns=['group'])
 
 
         fdrPATH = round(fdrPATH, 2)
         path_ranksum_discovery = round(path_ranksum_discovery, 2)
-        results = [path,fdrPATH,eff_path,path_size,path_pv_discovery,path_ranksum_discovery]
+        results = [path,group_numbers,fdrPATH,eff_path,path_size,path_pv_discovery,path_ranksum_discovery]
         output_path_table = pd.concat(results, axis=1, sort=False)
 
 
@@ -294,13 +326,13 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
 
     if not ind_bpm.empty:
         output_bpm_table.to_excel(writer, sheet_name='output_bpm_table')
-        output_BPM_groups_table.to_excel(writer, sheet_name='BPM_redundant_groups')
+        #output_BPM_groups_table.to_excel(writer, sheet_name='BPM_redundant_groups')
     if not ind_wpm.empty:
         output_wpm_table.to_excel(writer, sheet_name='output_wpm_table')
-        output_WPM_groups_table.to_excel(writer, sheet_name='WPM_redundant_groups')
+        #output_WPM_groups_table.to_excel(writer, sheet_name='WPM_redundant_groups')
     if not ind_path.empty:
         output_path_table.to_excel(writer, sheet_name='output_path_table')
-        output_PATH_groups_table.to_excel(writer, sheet_name='PATH_redundant_groups')
+        #output_PATH_groups_table.to_excel(writer, sheet_name='PATH_redundant_groups')
 
     writer.save()
 
