@@ -124,8 +124,8 @@ def fdrsampleperm(ssmFile, BPMindFile, pcut, minpath, N, genesetname=None):
 
     # calling calculate_fdr() function to compute FDRs
     fdrBPM1, fdrBPM2 = calculate_fdr(bpmdf, bpm_cols, bpm_pvdf, bpm_pv_cols, pcut, N, 'bpm')
-    fdrWPM1, fdrWPM2 = calculate_fdr(wpmdf, wpm_cols, wpm_pvdf, wpm_pv_cols, 0.05, N, 'wpm')
-    fdrPATH1, fdrPATH2 = calculate_fdr(pathdf, path_cols, path_pvdf, path_pv_cols, 0.05, N, 'path')
+    fdrWPM1, fdrWPM2 = calculate_fdr(wpmdf, wpm_cols, wpm_pvdf, wpm_pv_cols, pcut, N, 'wpm')
+    fdrPATH1, fdrPATH2 = calculate_fdr(pathdf, path_cols, path_pvdf, path_pv_cols, pcut, N, 'path')
 
     bpm_ranksum = bpmdf[bpm_cols[0:1]]
     bpm_ranksum.columns = ['bpm_ranksum']
@@ -186,12 +186,12 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
             # checking BPMs with lower emp. p-vals in real network
             pvf1 = pv1[(pv1<=valid_pvs[i])].ge(0).to_numpy()
             # checking BPMs with lower ranksum p-vals in real network
-            svf1 = sdf1[(sdf1>=round(vpv1[i]))].ge(0).to_numpy()
+            svf1 = sdf1[(sdf1>=vpv1[i])].ge(0).to_numpy()
             tfs1 = pvf1&svf1
             # checking BPMs with lower emp. p-vals in random networks
             pvf2 = pv_rest[pv_rest<=valid_pvs[i]].ge(0).to_numpy()
             # checking BPMs with lower ranksum p-vals in random networks
-            svf2 = sdf_rest[sdf_rest>=round(vpv1[i])].ge(0).to_numpy()
+            svf2 = sdf_rest[sdf_rest>=vpv1[i]].ge(0).to_numpy()
             tfs2 = pvf2&svf2
             rs_val_cnts = tfs1.sum()
             rsrest_val_cnts = tfs2.sum()/N
@@ -237,11 +237,11 @@ def calculate_fdr(sdf, sdf_cols, pvdf, pv_cols, pcut, N, type):
     for i in range(len(testM)):
         rfdr1.loc[testM[i][0]] = testM[i][2]
 
-    if not (type == 'bpm'):
+    if type == 'bpm':
         testM = list(map(list, zip(vrows, valid_pvs, list(fdr2), vpv1)))
     else:
         testM = list(map(list, zip(vrows, valid_pvs, list(fdr2), [round(x) for x in vpv1])))
-    testM.sort(key=lambda x: (-x[1], x[3]))
+    testM.sort(key=lambda x: (-x[1]))
 
     # correct FDRs so BPM/WPM/PATH with lower p-vals does not have larger FDRs
     testM = np.array(testM)

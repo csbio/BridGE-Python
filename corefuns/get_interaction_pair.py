@@ -50,10 +50,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 
 
 
-	## only for testing 
-	geneset_file = snp2path.geneset
-	pklin = open(geneset_file,'rb')
-	geneset = pickle.load(pklin)
+	
 
 	pklin = open(bpmfile,'rb')
 	bpm = pickle.load(pklin)
@@ -62,6 +59,11 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	dir_sp = snp2pathwayfile.split('/')
 	s = '/'
 	project_dir = s.join(dir_sp[:-1])
+
+
+	geneset_file = snp2path.geneset
+	pklin = open(geneset_file,'rb')
+	geneset = pickle.load(pklin)
 
 
 	## load snp data
@@ -328,20 +330,24 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		D = np.broadcast_to(ind2.shape[0],in_int.shape)
 		hype_in = np.concatenate((N,D,in_int,all_int),axis=1)
 		gi_hyge = np.apply_along_axis(hygetest_caller,1,hype_in)
-		gi_hyge	= -1 * np.log10(gi_hyge)
+		gi_hyge_log	= -1 * np.log10(gi_hyge)
 
-		t = {'snps': snps,'genes': genes,'snp_mean_gi': snp_mean_gi, 'snp_mean_gi_bg': snp_mean_gi_bg, 'gi_fold': gi_fold, 'gi_hyge': gi_hyge}
-		output_path1_snp = pd.DataFrame(data=t,columns=['snps','genes', 'snp_mean_gi','snp_mean_gi_bg','gi_fold','gi_hyge'])
+
+		t = {'snps': snps,'genes': genes,'snp_mean_gi': snp_mean_gi, 'snp_mean_gi_bg': snp_mean_gi_bg, 'gi_fold': gi_fold, 'gi_hyge': gi_hyge,'gi_hyge_log': gi_hyge_log}
+		output_path1_snp = pd.DataFrame(data=t,columns=['snps','genes', 'snp_mean_gi','snp_mean_gi_bg','gi_fold','gi_hyge','gi_hyge_log'])
+		output_path1_snp = output_path1_snp[(output_path1_snp['gi_hyge']<=0.05)&(output_path1_snp['gi_fold'] > 1.2)]
 		output_path1_snp.sort_values('gi_fold', ascending=False ,inplace=True)
-		output_path1_snp =  output_path1_snp.loc[output_path1_snp['gi_fold']>1.2]
-		output_path1_snp.sort_values('gi_hyge', ascending=False ,inplace=True)
+		if output_path1_snp.shape[0] > 20:
+			output_path1_snp = output_path1_snp.iloc[0:20,:]
+		#output_path1_snp =  output_path1_snp.loc[output_path1_snp['gi_fold']>1.2]
+		#output_path1_snp.sort_values('gi_hyge', ascending=False ,inplace=True)
 	
 		if p_id1 == p_id2:
 			output_path2_snp = None
 		else:
 			## preparing output for pathway 2
-			ind2_mean_GI  = np.sum((ssm_dis>0.2),axis=0) / ind2.shape[0]
-			ind2_mean_GI_bg = np.sum((ssm[:,ind2]>0.2) ,axis=0) / ssm.shape[1]
+			ind2_mean_GI  = np.sum((ssm_dis>0.2),axis=0) / ind1.shape[0]
+			ind2_mean_GI_bg = np.sum((ssm[:,ind2]>0.2) ,axis=0) / ssm.shape[0]
 			snps = ind2_snp
 			genes = ind2_gene
 			snp_mean_gi = ind2_mean_GI
@@ -356,19 +362,22 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			D = np.broadcast_to(ind1.shape[0],in_int.shape)
 			hype_in = np.concatenate((N,D,in_int,all_int),axis=1)
 			gi_hyge = np.apply_along_axis(hygetest_caller,1,hype_in)
-			gi_hyge = -1 * np.log10(gi_hyge)
+			gi_hyge_log = -1 * np.log10(gi_hyge)
 
-			t = {'snps': snps,'genes': genes,'snp_mean_gi': snp_mean_gi, 'snp_mean_gi_bg': snp_mean_gi_bg, 'gi_fold': gi_fold, 'gi_hyge': gi_hyge}
-			output_path2_snp = pd.DataFrame(data=t,columns=['snps','genes', 'snp_mean_gi','snp_mean_gi_bg','gi_fold','gi_hyge'])
+			t = {'snps': snps,'genes': genes,'snp_mean_gi': snp_mean_gi, 'snp_mean_gi_bg': snp_mean_gi_bg, 'gi_fold': gi_fold, 'gi_hyge': gi_hyge,'gi_hyge_log': gi_hyge_log}
+			output_path2_snp = pd.DataFrame(data=t,columns=['snps','genes', 'snp_mean_gi','snp_mean_gi_bg','gi_fold','gi_hyge','gi_hyge_log'])
+			output_path2_snp = output_path2_snp[(output_path2_snp['gi_hyge'] <= 0.05) & (output_path2_snp['gi_fold'] > 1.2)]
 			output_path2_snp.sort_values('gi_fold', ascending=False ,inplace=True)
-			output_path2_snp =  output_path2_snp.loc[output_path2_snp['gi_fold']>1.2]
-			output_path2_snp.sort_values('gi_hyge', ascending=False ,inplace=True)
+			if output_path2_snp.shape[0] > 20:
+				output_path2_snp = output_path2_snp.iloc[0:20,:]
+			#output_path2_snp =  output_path2_snp.loc[output_path2_snp['gi_fold']>1.2]
+			#output_path2_snp.sort_values('gi_hyge', ascending=False ,inplace=True)
 		if p_id1 != p_id2:
 			idx = output_path1_snp[output_path1_snp['gi_fold']>1].dropna()
 			bpm_snp_tmp = []
 			if not idx.empty:
 				for row in idx.head(20).iterrows():
-					temp_str = row[1]['snps']+'_'+row[1]['genes']+'_'+str(round(row[1]['gi_fold'], 2))
+					temp_str = row[1]['snps']+'_'+row[1]['genes']+'_fold'+str(round(row[1]['gi_fold'], 2))+'_hyge'+str(round(row[1]['gi_hyge_log'], 2))
 					bpm_snp_tmp.append(temp_str)
 				bpm_path1_drivers.append(';'.join(bpm_snp_tmp))
 			else:
@@ -377,7 +386,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			bpm_snp_tmp = []
 			if not idx.empty:
 				for row in idx.head(20).iterrows():
-					temp_str = row[1]['snps']+'_'+row[1]['genes']+'_'+str(round(row[1]['gi_fold'], 2))
+					temp_str = row[1]['snps']+'_'+row[1]['genes']+'_fold'+str(round(row[1]['gi_fold'], 2))+'_hyge'+str(round(row[1]['gi_hyge_log'], 2))
 					bpm_snp_tmp.append(temp_str)
 				bpm_path2_drivers.append(';'.join(bpm_snp_tmp))
 			else:
@@ -387,7 +396,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			wpm_snp_tmp = []
 			if idx.shape[1] > 0:
 				for row in idx.head(20).iterrows():
-					temp_str = row[1]['snps']+'_'+row[1]['genes']+'_'+str(round(row[1]['gi_fold'], 2))
+					temp_str = row[1]['snps']+'_'+row[1]['genes']+'_fold'+str(round(row[1]['gi_fold'], 2))+'_hyge'+str(round(row[1]['gi_hyge_log'], 2))
 					wpm_snp_tmp.append(temp_str)
 				wpm_path_drivers.append(';'.join(wpm_snp_tmp))
 			else:
@@ -401,14 +410,6 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 
 	out_triple = [bpm_path1_drivers,bpm_path2_drivers,wpm_path_drivers]
 	return out_triple
-
-
-
-
-
-
-
-
 
 
 

@@ -10,6 +10,8 @@ import multiprocessing as mp
 from multiprocessing import sharedctypes
 import sys
 import pickle
+from os import path
+from corefuns import withinclassrand as wrand
 from classes import snpsetclass as snps
 from classes import InteractionNetwork
 
@@ -292,6 +294,7 @@ def run(project_dir,model,alpha1,alpha2,n_workers,R):
 	print('computing interacttion. R='+str(R)+' model = '+model)
 	## output name
 	output_name = project_dir+'/ssM_mhygessi_'+ model+'_R'+str(R) + '.pkl'
+	cluster_file = project_dir+'/PlinkFile.cluster2'
 	
 	# loading and reading SNP data
 	pkl_d = open(project_dir+'/SNPdataAD.pkl','rb')
@@ -317,10 +320,13 @@ def run(project_dir,model,alpha1,alpha2,n_workers,R):
 	population_size = pheno.shape[0]
 	## shuffle phenotypes if R != 0
 	if R > 0:
-		numpy.random.seed(66754)
-		for i in range(R):
-			permuted_idx = numpy.random.permutation(population_size)
-		pheno = pheno[permuted_idx]
+		if not path.exists(cluster_file):
+			numpy.random.seed(66754)
+			for i in range(R):
+				permuted_idx = numpy.random.permutation(population_size)
+			pheno = pheno[permuted_idx]
+		else:
+			pheno = wrand.withinclassrand(R,cluster_file,project_dir+'/SNPdataAD.pkl')
 
 	case_size = numpy.count_nonzero(pheno)
 	control_size = population_size - case_size
