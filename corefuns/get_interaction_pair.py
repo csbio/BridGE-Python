@@ -337,8 +337,8 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		output_path1_snp = pd.DataFrame(data=t,columns=['snps','genes', 'snp_mean_gi','snp_mean_gi_bg','gi_fold','gi_hyge','gi_hyge_log'])
 		output_path1_snp = output_path1_snp[(output_path1_snp['gi_hyge']<=0.05)&(output_path1_snp['gi_fold'] > 1.2)]
 		output_path1_snp.sort_values('gi_fold', ascending=False ,inplace=True)
-		if output_path1_snp.shape[0] > 20:
-			output_path1_snp = output_path1_snp.iloc[0:20,:]
+		#if output_path1_snp.shape[0] > 20:
+		#	output_path1_snp = output_path1_snp.iloc[0:20,:]
 		#output_path1_snp =  output_path1_snp.loc[output_path1_snp['gi_fold']>1.2]
 		#output_path1_snp.sort_values('gi_hyge', ascending=False ,inplace=True)
 	
@@ -347,7 +347,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		else:
 			## preparing output for pathway 2
 			ind2_mean_GI  = np.sum((ssm_dis>0.2),axis=0) / ind1.shape[0]
-			ind2_mean_GI_bg = np.sum((ssm[:,ind2]>0.2) ,axis=0) / ssm.shape[0]
+			ind2_mean_GI_bg = np.sum((ssm[ind2,:]>0.2) ,axis=1) / ssm.shape[0]
 			snps = ind2_snp
 			genes = ind2_gene
 			snp_mean_gi = ind2_mean_GI
@@ -368,8 +368,8 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			output_path2_snp = pd.DataFrame(data=t,columns=['snps','genes', 'snp_mean_gi','snp_mean_gi_bg','gi_fold','gi_hyge','gi_hyge_log'])
 			output_path2_snp = output_path2_snp[(output_path2_snp['gi_hyge'] <= 0.05) & (output_path2_snp['gi_fold'] > 1.2)]
 			output_path2_snp.sort_values('gi_fold', ascending=False ,inplace=True)
-			if output_path2_snp.shape[0] > 20:
-				output_path2_snp = output_path2_snp.iloc[0:20,:]
+			#if output_path2_snp.shape[0] > 20:
+			#	output_path2_snp = output_path2_snp.iloc[0:20,:]
 			#output_path2_snp =  output_path2_snp.loc[output_path2_snp['gi_fold']>1.2]
 			#output_path2_snp.sort_values('gi_hyge', ascending=False ,inplace=True)
 		if p_id1 != p_id2:

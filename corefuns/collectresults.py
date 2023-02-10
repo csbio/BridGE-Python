@@ -184,6 +184,10 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
         bpm_ranksum_discovery= bpm_ranksum_discovery.reindex(index=bpms.index)
         bpm_ranksum_discovery = bpm_ranksum_discovery.reset_index(drop = True)
         group_numbers = pd.DataFrame(data=bpm_groups,columns=['group'])
+        bpm_path1_drivers = bpm_path1_drivers.reindex(index=bpms.index)
+        bpm_path1_drivers = bpm_path1_drivers.reset_index(drop = True)
+        bpm_path2_drivers = bpm_path2_drivers.reindex(index=bpms.index)
+        bpm_path2_drivers = bpm_path2_drivers.reset_index(drop = True)
 
 
         fdrBPM = round(fdrBPM, 2)
@@ -222,6 +226,8 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
         wpm_ranksum_discovery = wpm_ranksum_discovery.reindex(index=wpms.index)
         wpm_ranksum_discovery = wpm_ranksum_discovery.reset_index(drop = True)
         group_numbers = pd.DataFrame(data=wpm_groups,columns=['group'])
+        wpm_path_drivers = wpm_path_drivers.reindex(index=wpms.index)
+        wpm_path_drivers = wpm_path_drivers.reset_index(drop = True)
 
 
         fdrWPM = round(fdrWPM, 2)
