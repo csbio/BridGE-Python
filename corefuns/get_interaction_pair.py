@@ -80,6 +80,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 
 	bpm_path1_drivers, bpm_path2_drivers = [], []
 	wpm_path_drivers = []
+	path_index = []
 
 	for i_path in range(n):
 		pathname1 = path1.iloc[i_path][0]
@@ -117,6 +118,11 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		if p_id1 != p_id2:
 			#find bpm_id
 			bpm_id = int(n_pairs - (pathway_size-p_id1)*(pathway_size-p_id1-1)/2 + p_id2 - p_id1 - 1)
+			if effect == 'protective':
+				rem = 0
+			else:
+				rem = bpm.bpm.shape[0]
+			path_index.append(bpm_id+rem)
 			## get snp ids
 			bpm_ind1 = bpm.bpm['ind1']
 			bpm_ind2 = bpm.bpm['ind2']
@@ -127,6 +133,11 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			wpm_ind1 = bpm.wpm['ind']
 			ind1 = wpm_ind1[p_id1]
 			ind2 = ind1
+			if effect == 'protective':
+				rem = 0
+			else:
+				rem = bpm.wpm.shape[0]
+			path_index.append(p_id1+rem)
 
 		## get snp rsids
 		ind1_snp = snpdataAR.rsid[ind1].values
@@ -404,9 +415,9 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 
 
 
-	bpm_path1_drivers = pd.DataFrame(bpm_path1_drivers, columns=['bpm_path1_drivers'])
-	bpm_path2_drivers = pd.DataFrame(bpm_path2_drivers, columns=['bpm_path2_drivers'])
-	wpm_path_drivers = pd.DataFrame(wpm_path_drivers, columns=['wpm_path_drivers'])
+	bpm_path1_drivers = pd.DataFrame(bpm_path1_drivers, columns=['bpm_path1_drivers'],index = path_index)
+	bpm_path2_drivers = pd.DataFrame(bpm_path2_drivers, columns=['bpm_path2_drivers'],index = path_index)
+	wpm_path_drivers = pd.DataFrame(wpm_path_drivers, columns=['wpm_path_drivers'],index = path_index)
 
 	out_triple = [bpm_path1_drivers,bpm_path2_drivers,wpm_path_drivers]
 	return out_triple
