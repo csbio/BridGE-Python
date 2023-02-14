@@ -21,6 +21,8 @@ from multiprocessing import sharedctypes
 import os, psutil
 import copy
 import datetime
+sys.path.append('classes')
+import InteractionNetwork # for cassi pickle class
 
 # genstats() computes BPM/WPM/PATH statistics. Can be run parallel.
 #

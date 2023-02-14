@@ -97,6 +97,8 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 
 		ssm_pr = ssmfile.split('.')
 		model = ssm_pr[0].split('_')[-2]
+		if model == 'LR':
+			model = 'AA'
 
 
 
@@ -405,7 +407,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		else:
 			idx = output_path1_snp[output_path1_snp['gi_fold']>1].dropna()
 			wpm_snp_tmp = []
-			if idx.shape[1] > 0:
+			if not idx.empty:
 				for row in idx.head(20).iterrows():
 					temp_str = row[1]['snps']+'_'+row[1]['genes']+'_fold'+str(round(row[1]['gi_fold'], 2))+'_hyge'+str(round(row[1]['gi_hyge_log'], 2))
 					wpm_snp_tmp.append(temp_str)

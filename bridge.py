@@ -132,7 +132,7 @@ if __name__ == '__main__':
 			ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
 
 	elif job == 'ComputeStats':
-		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
+		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined' or mdoel == 'AA'):
 			sys.exit('wrong model')
 		bpmfile = project_dir+'/BPMind.pkl'
 		if not path.exists(bpmfile):
@@ -145,6 +145,8 @@ if __name__ == '__main__':
 			#ci.combine(alpha1,alpha2,n_workers,R)
 			# build ssM file name
 			ssmfile = project_dir+'/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
+		elif model == 'AA':
+			ssmfile = project_dir+'/ssM_cassi_LR_R'+ str(i) + '.pkl'
 		else:
 			#ci.run(model,alpha1,alpha2,n_workers,R)	
 			ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
@@ -156,6 +158,8 @@ if __name__ == '__main__':
 			sys.exit(project_dir+'/BPMind.pkl not found')
 		if model == 'combined':
 			ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
+		elif model = 'AA':
+			ssmfile = project_dir+'/ssM_cassi_LR_R'+ str(i) + '.pkl'
 		else:
 			ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R0.pkl'
 		if not path.exists(ssmfile):
@@ -176,6 +180,9 @@ if __name__ == '__main__':
 		if model == 'combined':
 			ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
 			resultsfile = project_dir+'/results_ssM_mhygessi_combined_R0.pkl'
+		elif model = 'AA':
+			ssmfile = project_dir+'/ssM_cassi_LR_R0.pkl'
+			resultsfile = project_dir+'/results_ssM_cassi_LR_R0.pkl'
 		else:
 			ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R0.pkl'
 			resultsfile = project_dir+'/results_ssM_mhygessi_'+model +'_R0.pkl'
