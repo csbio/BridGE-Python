@@ -7,9 +7,9 @@ import sys
 if __name__ == '__main__':
 	genomefile = sys.argv[1]
 	pi_hat = float(sys.argv[2])
-	s = '/'
-	tmp_dir = genomefile.split('/')
-	project_dir = s.join(tmp_dir[0:-1])
+#	s = '/'
+#	tmp_dir = genomefile.split('/')
+#	project_dir = s.join(tmp_dir[0:-1])
 	data = pd.read_csv(genomefile,sep='\s+')
 	data1 = data.iloc[:,0:2].to_numpy()
 	data2 = data.iloc[:,2:4].to_numpy()
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 		ind2remove.extend(idx)
 	df = pd.DataFrame(varname, columns=['FID1','IID1'])
 	df = df.iloc[ind2remove,:]
-	df.to_csv(project_dir+'/'+'related_subject2remove.txt',index=False,sep='\t')
+	df.to_csv('related_subject2remove.txt',index=False,sep='\t')
 
 
 
