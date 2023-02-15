@@ -14,9 +14,9 @@ if [ -z "${pi_hat}" ]; then pi_hat=0.2; fi
 DIRPATH=$(dirname "$PlinkFile")
 # LD prune before calculate IBD
 plink --bfile ${PlinkFile} --allow-no-sex --indep-pairwise 50 5 0.2
-mv plink.prune.in $DIRPATH/plink.prune.in
-mv plink.prune.in $DIRPATH/plink.prune.out
-plink --bfile ${PlinkFile} --extract $DIRPATH/plink.prune.in --allow-no-sex --make-bed --out ${PlinkFile}_pruned_tmp
+#mv plink.prune.in $DIRPATH/plink.prune.in
+#mv plink.prune.in $DIRPATH/plink.prune.out
+plink --bfile ${PlinkFile} --extract plink.prune.in --allow-no-sex --make-bed --out ${PlinkFile}_pruned_tmp
 
 # calculate IBD
 if [ ! -f ${PlinkFile}.genome ]; then
@@ -27,14 +27,14 @@ fi
 # if *.genome file has more than 2 lines
 if [[ $(wc -l <${PlinkFile}.genome) -ge 2 ]];then
      # find close related individuals and remove them
-     if [  -f $DIRPATH/related_subject2remove.txt ]; then
-          rm $DIRPATH/related_subject2remove.txt
+     if [  -f related_subject2remove.txt ]; then
+          rm related_subject2remove.txt
      fi
      python3 $PYTHONPATH/removerelatedindividual.py ${PlinkFile}.genome ${pi_hat}
-     plink --bfile ${PlinkFile} --remove $DIRPATH/related_subject2remove.txt --allow-no-sex --make-bed --out ${OutputFile} > /dev/null
+     plink --bfile ${PlinkFile} --remove related_subject2remove.txt --allow-no-sex --make-bed --out ${OutputFile} > /dev/null
 else
      # no need to remove any individuals
      plink --bfile ${PlinkFile} --allow-no-sex --make-bed --out ${OutputFile} > /dev/null
 fi
 rm ${PlinkFile}_pruned_tmp*
-rm $DIRPATH/related_subject2remove.txt
+rm related_subject2remove.txt
