@@ -20,21 +20,21 @@ if __name__ == '__main__':
 	# Default parameters defined
 	job = ''
 	plinkfile = ''
-	project_dir = 'data'
-	genesets='data/toy.genesets' 
-	gene_annotation = 'data/glist-hg19' 
+	#project_dir = 'data'
+	genesets='refdata/c2.cp.v7.1' 
+	gene_annotation = 'refdata/glist-hg38' 
 	mappingDistance = 50000
 	minPath = 10
 	maxPath = 300
 	alpha1 = 0.05
 	alpha2 = 0.05
 	n_workers = 4
-	sample_perms = 0
+	sample_perms = 10
 	binaryNetwork = False
-	snpPerms = 100
+	snpPerms = 10000
 	i = -1
 	pval_cutoff = 0.05
-	fdrcut = 0.1
+	fdrcut = 0.25
 	snppathwayfile = 'data/snp_pathway_min10_max300.pkl'
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 			ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
 
 	elif job == 'ComputeStats':
-		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined' or mdoel == 'AA'):
+		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined' or model == 'AA'):
 			sys.exit('wrong model')
 		bpmfile = project_dir+'/BPMind.pkl'
 		if not path.exists(bpmfile):
@@ -158,7 +158,7 @@ if __name__ == '__main__':
 			sys.exit(project_dir+'/BPMind.pkl not found')
 		if model == 'combined':
 			ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
-		elif model = 'AA':
+		elif model == 'AA':
 			ssmfile = project_dir+'/ssM_cassi_LR_R'+ str(i) + '.pkl'
 		else:
 			ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R0.pkl'
@@ -180,7 +180,7 @@ if __name__ == '__main__':
 		if model == 'combined':
 			ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
 			resultsfile = project_dir+'/results_ssM_mhygessi_combined_R0.pkl'
-		elif model = 'AA':
+		elif model == 'AA':
 			ssmfile = project_dir+'/ssM_cassi_LR_R0.pkl'
 			resultsfile = project_dir+'/results_ssM_cassi_LR_R0.pkl'
 		else:
