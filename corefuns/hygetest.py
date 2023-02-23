@@ -1,6 +1,5 @@
 from scipy.stats import hypergeom
 import numpy as np
-import matplotlib.pyplot as plt
 import functools
 
 # HYGETEST computes Hypergeometric cumulative distribution for
