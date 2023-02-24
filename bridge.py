@@ -35,7 +35,7 @@ if __name__ == '__main__':
 	i = -1
 	pval_cutoff = 0.05
 	fdrcut = 0.25
-	snppathwayfile = 'data/snp_pathway_min10_max300.pkl'
+#	snppathwayfile = 'data/snp_pathway_min10_max300.pkl'
 	for arg in sys.argv:
 		if '=' in arg and '--' in arg:
 			o = arg.split('=')[0]
