@@ -5,38 +5,39 @@ channels:
 dependencies:
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=2_gnu
-  - bzip2=1.0.8=h7f98852_4
   - ca-certificates=2022.12.7=ha878542_0
   - cython=0.29.33=py38h8dc9893_0
   - ld_impl_linux-64=2.40=h41732ed_0
   - libblas=3.9.0=8_openblas
   - libcblas=3.9.0=8_openblas
-  - libffi=3.4.2=h7f98852_5
+  - libffi=3.2.1=he1b5a44_1007
   - libgcc-ng=12.2.0=h65d4601_19
   - libgfortran-ng=7.5.0=h14aa051_20
   - libgfortran4=7.5.0=h14aa051_20
   - libgomp=12.2.0=h65d4601_19
   - liblapack=3.9.0=8_openblas
-  - libnsl=2.0.0=h7f98852_0
   - libopenblas=0.3.12=pthreads_hb3c22a3_1
   - libsqlite=3.40.0=h753d276_0
   - libstdcxx-ng=12.2.0=h46fd767_19
-  - libuuid=2.32.1=h7f98852_1000
   - libzlib=1.2.13=h166bdaf_4
   - ncurses=6.3=h27087fc_1
   - numpy=1.19.5=py38h8246c76_3
-  - openssl=3.0.8=h0b41bf4_0
+  - openssl=1.1.1t=h0b41bf4_0
   - pandas=1.1.1=py38h950e882_0
   - pip=23.0.1=pyhd8ed1ab_0
   - psutil=5.9.4=py38h0a891b7_0
-  - python=3.8.16=he550d4f_1_cpython
+  - python=3.8.3=cpython_he5300dc_0
   - python-dateutil=2.8.2=pyhd8ed1ab_0
-  - python_abi=3.8=3_cp38
+  - python_abi=3.8=2_cp38
   - pytz=2022.7.1=pyhd8ed1ab_0
   - readline=8.1.2=h0f457ee_0
   - scipy=1.5.0=py38h18bccfc_0
   - setuptools=59.8.0=py38h578d9bd_1
   - six=1.16.0=pyh6c4a22f_0
+  - sqlite=3.40.0=h4ff8645_0
   - tk=8.6.12=h27826a3_0
   - wheel=0.38.4=pyhd8ed1ab_0
   - xz=5.2.6=h166bdaf_0
+  - zlib=1.2.13=h166bdaf_4
+variables:
+  PYTHONNOUSERSITE: '1'
