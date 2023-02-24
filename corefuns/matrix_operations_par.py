@@ -2,9 +2,9 @@ import numpy
 import time
 import math
 import pandas as pd
-from scipy.io import loadmat
+#from scipy.io import loadmat
 from scipy.stats import hypergeom
-from scipy.io import loadmat,savemat
+#from scipy.io import loadmat,savemat
 from corefuns import HygeCache as hc
 import multiprocessing as mp
 from multiprocessing import sharedctypes
