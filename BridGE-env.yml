@@ -7,7 +7,7 @@ dependencies:
   - _openmp_mutex=4.5=2_gnu
   - brotli=1.0.9=h5eee18b_7
   - brotli-bin=1.0.9=h5eee18b_7
-  - ca-certificates=2023.01.10=h06a4308_0
+  - ca-certificates=2022.12.7=ha878542_0
   - contourpy=1.0.5=py38hdb19cb5_0
   - cycler=0.11.0=pyhd3eb1b0_0
   - cython=0.29.33=py38h8dc9893_0
@@ -54,9 +54,9 @@ dependencies:
   - matplotlib-base=3.6.2=py38h945d387_0
   - munkres=1.1.4=py_0
   - ncurses=6.3=h27087fc_1
-  - networkx=2.8.4=py38h06a4308_0
+  - networkx=2.8.8=pyhd8ed1ab_0
   - numpy=1.19.5=py38h8246c76_3
-  - openssl=1.1.1t=h7f8727e_0
+  - openssl=1.1.1t=h0b41bf4_0
   - packaging=22.0=py38h06a4308_0
   - pandas=1.1.1=py38h950e882_0
   - pcre=8.45=h295c915_0
