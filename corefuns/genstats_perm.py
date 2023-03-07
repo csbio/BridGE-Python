@@ -642,7 +642,7 @@ def rungenstats(input_network,bpm,wpm,minPath,binary_flag,snpPerms,n_workers): #
 
 
 
-def genstats(ssmfile,bpmfile,binary_flag,snpPerms,minPath,n_workers,netDensity=0):
+def genstats(ssmfile,bpmfile,binary_flag,snpPerms,minPath,n_workers,netDensity=None):
 	### load bpmfile
 	pklin = open(bpmfile,'rb')
 	bpm_obj = pickle.load(pklin)
@@ -654,7 +654,7 @@ def genstats(ssmfile,bpmfile,binary_flag,snpPerms,minPath,n_workers,netDensity=0
 	p_network = network.protective
 	r_network = network.risk
 	if binary_flag:
-		if netDensity==0:
+		if netDensity == None:
 			p_network[p_network>0] = 1
 			r_network[r_network>0] = 1
 		else:

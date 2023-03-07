@@ -32,7 +32,7 @@ from corefuns import pathway_map as pmap
 
 
 
-def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenemappingfile):
+def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenemappingfile,densitycutoff=None):
 
     pklin = open(resultsfile,"rb")
     rfd = pickle.load(pklin)
@@ -107,7 +107,7 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
 
             eff_bpm = pd.DataFrame(eff_bpm, columns=['eff_bpm'])
 
-            [bpm_path1_drivers, bpm_path2_drivers,tmp] = gpair.get_interaction_pair(len(ind_bpm),path1,path2,eff_bpm,ssmfile,bpmindfile,snppathwayfile,snpgenemappingfile,path_ids)            
+            [bpm_path1_drivers, bpm_path2_drivers,tmp] = gpair.get_interaction_pair(len(ind_bpm),path1,path2,eff_bpm,ssmfile,bpmindfile,snppathwayfile,snpgenemappingfile,path_ids,densitycutoff)            
 
         if not ind_wpm.empty:
             pathway = bpm.wpm['pathway']
@@ -126,7 +126,7 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
                     eff_wpm.append('risk')
             eff_wpm = pd.DataFrame(eff_wpm, columns=['eff_wpm'])
 
-            [tmp1,tmp2,wpm_path_drivers] = gpair.get_interaction_pair(len(ind_wpm),path_wpm,path_wpm,eff_wpm,ssmfile,bpmindfile,snppathwayfile,snpgenemappingfile,path_ids)
+            [tmp1,tmp2,wpm_path_drivers] = gpair.get_interaction_pair(len(ind_wpm),path_wpm,path_wpm,eff_wpm,ssmfile,bpmindfile,snppathwayfile,snpgenemappingfile,path_ids,densitycutoff)
 
         if not ind_path.empty:
             pathway = bpm.wpm['pathway']

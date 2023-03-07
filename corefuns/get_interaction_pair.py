@@ -42,7 +42,7 @@ def hygetest_caller(input_row):
 	return ht.hygetest(input_row[0],input_row[1],input_row[2],input_row[3])
 
 
-def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,snp2genefile,path_ids):
+def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,snp2genefile,path_ids,densitycutoff=None):
 	pklin = open(snp2genefile,'rb')
 	snp2gene = pickle.load(pklin)
 	pklin = open(snp2pathwayfile,'rb')
@@ -77,6 +77,16 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	pklin = open(ssmfile,'rb')
 	int_network = pickle.load(pklin)
 
+	# find score cutoffs if densitycutoff provided
+	if densitycutoff == None:
+		pos_cutoff = 0.2
+		neg_cutoff = 0.2
+	else:
+		if densitycutoff <= 0 or densitycutoff >=1:
+			densitycutoff = 0.1
+		pos_cutoff = np.quantile(int_network.protective,1-densitycutoff)
+		neg_cutoff = np.quantile(int_network.risk,1-densitycutoff)
+
 
 	bpm_path1_drivers, bpm_path2_drivers = [], []
 	wpm_path_drivers = []
@@ -91,14 +101,15 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		if effect == 'protective':
 			ssm = int_network.protective
 			max_id = int_network.protective_max_id
+			score_cutoff = pos_cutoff
 		else:
 			ssm = int_network.risk
 			max_id = int_network.risk_max_id
+			score_cutoff = neg_cutoff
 
 		ssm_pr = ssmfile.split('.')
 		model = ssm_pr[0].split('_')[-2]
-		if model == 'LR':
-			model = 'AA'
+
 
 
 
@@ -198,7 +209,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			tmp_dis = np.tril(ssm_dis)
 		else:
 			tmp_dis = ssm_dis
-		bin_int_index = np.argwhere(tmp_dis>0.2)
+		bin_int_index = np.argwhere(tmp_dis>score_cutoff)
 		i = bin_int_index[:,0]
 		j = bin_int_index[:,1]
 		snps1 = ind1_snp[i]
@@ -319,25 +330,26 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 						snp_pair[:,k] = np.multiply(snpdataAD1.iloc[:,i[k]],snpdataAR2.iloc[:,j[k]])
 
 
-		t = {'snp1': snps1, 'gene1': genes1, 'snp2': snps2 , 'gene2': genes2,'GI type': GT_type,'case frequency': freq_case,'control frequency': freq_control,'GI': GI}
-		output_pair = pd.DataFrame(data=t,columns=['snp1', 'gene1', 'snp2', 'gene2', 'GI type', 'case frequency', 'control frequency', 'GI' ])
-		output_pair.sort_values('GI', ascending=False ,inplace=True)
+		if model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined':
+			t = {'snp1': snps1, 'gene1': genes1, 'snp2': snps2 , 'gene2': genes2,'GI type': GT_type,'case frequency': freq_case,'control frequency': freq_control,'GI': GI}
+			output_pair = pd.DataFrame(data=t,columns=['snp1', 'gene1', 'snp2', 'gene2', 'GI type', 'case frequency', 'control frequency', 'GI' ])
+			output_pair.sort_values('GI', ascending=False ,inplace=True)
 
 		ind1 = np.array(ind1)
 		ind2 = np.array(ind2)
 
 		## preparing output for pathway 1
-		ind1_mean_GI  = np.sum((ssm_dis>0.2),axis=1) / ind2.shape[0]
-		ind1_mean_GI_bg = np.sum((ssm[ind1,:]>0.2) ,axis=1) / ssm.shape[1]
+		ind1_mean_GI  = np.sum((ssm_dis>score_cutoff),axis=1) / ind2.shape[0]
+		ind1_mean_GI_bg = np.sum((ssm[ind1,:]>score_cutoff) ,axis=1) / ssm.shape[1]
 		snps = ind1_snp
 		genes = ind1_gene
 		snp_mean_gi = ind1_mean_GI
 		snp_mean_gi_bg = ind1_mean_GI_bg
 		gi_fold = np.divide(snp_mean_gi,snp_mean_gi_bg)
 		gi_fold[np.isnan(gi_fold)] = 0
-		in_int = np.sum((ssm_dis>0.2),axis=1)
+		in_int = np.sum((ssm_dis>score_cutoff),axis=1)
 		in_int = np.reshape(in_int,(in_int.shape[0],1))
-		all_int = np.sum((ssm[ind1,:]>0.2) ,axis=1)
+		all_int = np.sum((ssm[ind1,:]>score_cutoff) ,axis=1)
 		all_int = np.reshape(all_int,(all_int.shape[0],1))
 		N = np.broadcast_to(ssm.shape[1],in_int.shape)
 		D = np.broadcast_to(ind2.shape[0],in_int.shape)
@@ -359,17 +371,17 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			output_path2_snp = None
 		else:
 			## preparing output for pathway 2
-			ind2_mean_GI  = np.sum((ssm_dis>0.2),axis=0) / ind1.shape[0]
-			ind2_mean_GI_bg = np.sum((ssm[ind2,:]>0.2) ,axis=1) / ssm.shape[0]
+			ind2_mean_GI  = np.sum((ssm_dis>score_cutoff),axis=0) / ind1.shape[0]
+			ind2_mean_GI_bg = np.sum((ssm[ind2,:]>score_cutoff) ,axis=1) / ssm.shape[0]
 			snps = ind2_snp
 			genes = ind2_gene
 			snp_mean_gi = ind2_mean_GI
 			snp_mean_gi_bg = ind2_mean_GI_bg
 			gi_fold = np.divide(snp_mean_gi,snp_mean_gi_bg)
 			gi_fold[np.isnan(gi_fold)] = 0
-			in_int = np.sum((ssm_dis>0.2),axis=0)
+			in_int = np.sum((ssm_dis>score_cutoff),axis=0)
 			in_int = np.reshape(in_int,(in_int.shape[0],1))
-			all_int = np.sum((ssm[:,ind2]>0.2) ,axis=0)
+			all_int = np.sum((ssm[:,ind2]>score_cutoff) ,axis=0)
 			all_int = np.reshape(all_int,(all_int.shape[0],1))
 			N = np.broadcast_to(ssm.shape[1],in_int.shape)
 			D = np.broadcast_to(ind1.shape[0],in_int.shape)
