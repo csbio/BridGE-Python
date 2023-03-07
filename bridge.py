@@ -189,14 +189,12 @@ if __name__ == '__main__':
 			if model == 'combined':
 				ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
 				resultsfile = project_dir+'/results_ssM_mhygessi_combined_R0.pkl'
-			elif model == 'AA':
-				ssmfile = project_dir+'/ssM_cassi_LR_R0.pkl'
-				resultsfile = project_dir+'/results_ssM_cassi_LR_R0.pkl'
 			else:
 				ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R0.pkl'
 				resultsfile = project_dir+'/results_ssM_mhygessi_'+model +'_R0.pkl'
 		else:
 			resultsfile = project_dir+'/results_'+ ssmfile
+			ssmfile = project_dir+'/'+ssmfile
 		if not path.exists(ssmfile):
 			sys.exit('interaction file not found, check model arg')
 		if not path.exists(resultsfile):
