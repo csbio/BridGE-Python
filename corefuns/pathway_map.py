@@ -197,9 +197,9 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 		if added_node_flag[x_id] == 1: # added before!
 			continue
 		if int_type == 'protective':
-			G.add_nodes_from([(x_id, {"color": "yellow"})])
+			G.add_nodes_from([(x_id, {"color": "green"})])
 		else:
-			G.add_nodes_from([(x_id, {"color": "blue"})])
+			G.add_nodes_from([(x_id, {"color": "green"})])
 		added_node_flag[x_id] = 1
 
 	### add all other the nodes
@@ -237,6 +237,16 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 	axis = plt.gca()
 	axis.set_xlim([1.5*x for x in axis.get_xlim()])
 	axis.set_ylim([1.5*y for y in axis.get_ylim()])
+	## add legend
+	legend_elements = [Line2D([0], [0], marker='o', color='w', label='pathway',markerfacecolor='g', markersize=15)]
+	#legend_elements.append(Line2D([0], [0], marker='o', color='w', label='protective PATH pwathway',markerfacecolor='yellow', markersize=15))
+	#legend_elements.append(Line2D([0], [0], marker='o', color='w', label='risk PATH pwathway',markerfacecolor='blue', markersize=15))
+	legend_elements.append(Line2D([0], [0], color='yellow', lw=4, label='protective interaction'))
+	legend_elements.append(Line2D([0], [0], color='blue', lw=4, label='risk interaction'))
+	legend_elements.append(Line2D([0], [0], marker='o', color='w', label='self loops indicate WPM interactions',markerfacecolor='w', markersize=1))
+	plt.legend(handles=legend_elements, loc='lower left')
+
+
 
 	## add Pathway names to the next page
 	fig2 = plt.figure()
@@ -246,7 +256,12 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 		txt = txt + tmp + '\n'
 	plt.axis('off')
 	plt.text(0.05,0.05,txt, transform=fig2.transFigure, size=12)
-	pp = PdfPages(project_dir+'/network-map.pdf')
+	# find output file name based on the resultsfile
+	tmp = resultsfile.split('results_')
+	ssmfile = tmp[1]
+	tmp = ssmfile.split('.pkl')
+	ssmfile = tmp[0]
+	pp = PdfPages(project_dir+'/network-map-'+ssmfile+'.pdf')
 	fig_nums = plt.get_fignums()
 	figs = [plt.figure(n) for n in fig_nums]
 	for fig in figs:
