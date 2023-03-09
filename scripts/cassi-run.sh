@@ -106,9 +106,9 @@ if [ -z "$net_id" ] ; then
         cassi -i ${infile}.bed  ${th_command} ${pval} -max 0 -o ${project_dir}/${outfile}_R0.txt
         # Step 2, convert SNP-SNP interaction to Python
         python3 corefuns/cassissm.py ${infile}.bim  ${project_dir}/${outfile}_R0.txt ${gi} ${project_dir}/${outfile}_R0.pkl
-        for net_id in {1..n}
+        for i in `seq 1 $n` ;
         do
-                tmp_seed=$(($seed+$net_id))
+                tmp_seed=$(($seed+$i))
                 plink --bfile $infile --seed $tmp_seed --make-perm-pheno 1 --out ${project_dir}/rand_pheno${net_id}
                 plink --bfile $infile --pheno ${project_dir}/rand_pheno${net_id}.pphe --mpheno 1 --make-bed --out ${infile}_R${net_id}
                 cassi -i ${infile}_R${net_id}.bed ${th_command} ${pval}  -max 0 -o ${project_dir}/${outfile}_R${net_id}.txt
