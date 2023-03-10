@@ -197,16 +197,16 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 		if added_node_flag[x_id] == 1: # added before!
 			continue
 		if int_type == 'protective':
-			G.add_nodes_from([(x_id, {"color": "green"})])
+			G.add_nodes_from([(x_id, {"color": "lightblue"})])
 		else:
-			G.add_nodes_from([(x_id, {"color": "green"})])
+			G.add_nodes_from([(x_id, {"color": "lightblue"})])
 		added_node_flag[x_id] = 1
 
 	### add all other the nodes
 	for i in range(len(used_pathways)):
 		if added_node_flag[i] == 0:
 			p = used_pathways[i]
-			G.add_nodes_from([(inds[p], {"color": "green"})])
+			G.add_nodes_from([(inds[p], {"color": "lightblue"})])
 	### add BPMs by adding edges
 	for i in range(len(used_pathways)):
 		for j in range(i,len(used_pathways)):
@@ -238,7 +238,7 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 	axis.set_xlim([1.5*x for x in axis.get_xlim()])
 	axis.set_ylim([1.5*y for y in axis.get_ylim()])
 	## add legend
-	legend_elements = [Line2D([0], [0], marker='o', color='w', label='pathway',markerfacecolor='g', markersize=15)]
+	legend_elements = [Line2D([0], [0], marker='o', color='w', label='pathway',markerfacecolor='lightblue', markersize=15)]
 	#legend_elements.append(Line2D([0], [0], marker='o', color='w', label='protective PATH pwathway',markerfacecolor='yellow', markersize=15))
 	#legend_elements.append(Line2D([0], [0], marker='o', color='w', label='risk PATH pwathway',markerfacecolor='blue', markersize=15))
 	legend_elements.append(Line2D([0], [0], color='yellow', lw=4, label='protective interaction'))

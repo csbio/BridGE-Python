@@ -6,6 +6,7 @@ from classes import fdrresultsclass
 from classes import bpmindclass
 from corefuns import get_interaction_pair as gpair
 from corefuns import pathway_map as pmap
+import math
 
 
 # collectresults() is responsible for collecting and exporting the results to an Excel file. It also calls functions for finding driver genes and non-redundunt modules.
@@ -146,7 +147,7 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
             eff_path = pd.DataFrame(eff_path, columns=['eff_path'])
             # print(eff_path)
 
-    BPM_nosig_noRD,WPM_nosig_noRD,PATH_nosig_noRD,BPM_group_tmp,WPM_group_tmp,PATH_group_tmp = cbwr.check_BPM_WPM_redundancy(fdrBPM, fdrWPM, fdrPATH, bpmindfile, 0.4)
+    BPM_nosig_noRD,WPM_nosig_noRD,PATH_nosig_noRD,BPM_group_tmp,WPM_group_tmp,PATH_group_tmp = cbwr.check_BPM_WPM_redundancy(fdrBPM, fdrWPM, fdrPATH, bpmindfile, fdrcut)
     pmap.draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_group_tmp) ## for drawing graph of BPMs/WPMs/PATHs
 
     if not ind_bpm.empty:
@@ -277,14 +278,42 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
 
     output_discovery_summary, output_noRD_discovery_summary = [], []
 
-    output_discovery_summary.append([fdrBPM['bpm2'].min(), (fdrBPM['bpm2']<=0.05).sum(), (fdrBPM['bpm2']<=0.1).sum(), (fdrBPM['bpm2']<=0.15).sum(), (fdrBPM['bpm2']<=0.2).sum(), (fdrBPM['bpm2']<=0.25).sum(), (fdrBPM['bpm2']<=0.3).sum(), (fdrBPM['bpm2']<=0.35).sum(), (fdrBPM['bpm2']<=0.4).sum()])
+    # round fdrcut to be multiple of 0.05
+    fdr_th = math.ceil(fdrcut/0.05)
+    #output_discovery_summary.append([fdrBPM['bpm2'].min(), (fdrBPM['bpm2']<=0.05).sum(), (fdrBPM['bpm2']<=0.1).sum(), (fdrBPM['bpm2']<=0.15).sum(), (fdrBPM['bpm2']<=0.2).sum(), (fdrBPM['bpm2']<=0.25).sum(), (fdrBPM['bpm2']<=0.3).sum(), (fdrBPM['bpm2']<=0.35).sum(), (fdrBPM['bpm2']<=0.4).sum()])
+    output_discovery_bpm = [fdrBPM['bpm2'].min()]
+    for f in range (1,fdr_th+1):
+        output_discovery_bpm.append((fdrBPM['bpm2']<=(f * 0.05)).sum())
+    output_discovery_summary.append(output_discovery_bpm)
+
+
+
 
     if not fdrWPM.empty:
-        output_discovery_summary.append([fdrWPM['wpm2'].min(), (fdrWPM['wpm2']<=0.05).sum(), (fdrWPM['wpm2']<=0.1).sum(), (fdrWPM['wpm2']<=0.15).sum(), (fdrWPM['wpm2']<=0.2).sum(), (fdrWPM['wpm2']<=0.25).sum(), (fdrWPM['wpm2']<=0.3).sum(), (fdrWPM['wpm2']<=0.35).sum(), (fdrWPM['wpm2']<=0.4).sum()])
-        output_discovery_summary.append([fdrPATH['path2'].min(), (fdrPATH['path2']<=0.05).sum(), (fdrPATH['path2']<=0.1).sum(), (fdrPATH['path2']<=0.15).sum(), (fdrPATH['path2']<=0.2).sum(), (fdrPATH['path2']<=0.25).sum(), (fdrPATH['path2']<=0.3).sum(), (fdrPATH['path2']<=0.35).sum(), (fdrPATH['path2']<=0.4).sum()])
+        #output_discovery_summary.append([fdrWPM['wpm2'].min(), (fdrWPM['wpm2']<=0.05).sum(), (fdrWPM['wpm2']<=0.1).sum(), (fdrWPM['wpm2']<=0.15).sum(), (fdrWPM['wpm2']<=0.2).sum(), (fdrWPM['wpm2']<=0.25).sum(), (fdrWPM['wpm2']<=0.3).sum(), (fdrWPM['wpm2']<=0.35).sum(), (fdrWPM['wpm2']<=0.4).sum()])
+        output_discovery_wpm = [fdrWPM['wpm2'].min()]
+        for f in range (1,fdr_th+1):
+            output_discovery_wpm.append((fdrWPM['wpm2']<=(f * 0.05)).sum())
+        output_discovery_summary.append(output_discovery_wpm)
+
+        #output_discovery_summary.append([fdrPATH['path2'].min(), (fdrPATH['path2']<=0.05).sum(), (fdrPATH['path2']<=0.1).sum(), (fdrPATH['path2']<=0.15).sum(), (fdrPATH['path2']<=0.2).sum(), (fdrPATH['path2']<=0.25).sum(), (fdrPATH['path2']<=0.3).sum(), (fdrPATH['path2']<=0.35).sum(), (fdrPATH['path2']<=0.4).sum()])
+        output_discovery_path = [fdrPATH['path2'].min()]
+        for f in range (1,fdr_th+1):
+            output_discovery_path.append((fdrPATH['path2']<=(f * 0.05)).sum())
+        output_discovery_summary.append(output_discovery_path)
 
 
-    output_header = ['minfdr','fdr05','fdr10','fdr15','fdr20','fdr25','fdr30','fdr35','fdr40']
+    #output_header = ['minfdr','fdr05','fdr10','fdr15','fdr20','fdr25','fdr30','fdr35','fdr40']
+    output_header = ['minfdr']
+    for f in range (1,fdr_th+1):
+        x = f * 5
+        if x < 10:
+            h = 'fdr0' + str(int(x))
+        else:
+            h = 'fdr' + str(int(x))
+        output_header.append(h)
+
+
 
 
     output_noRD_discovery_summary.append([fdrBPM['bpm2'].min()] + BPM_nosig_noRD)
