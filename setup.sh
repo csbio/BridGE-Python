@@ -9,7 +9,7 @@ mv cyadd*.so corefuns/cyadd.so
 #chmod u+x preprocessgwas.sh
 chmod u+x scripts/*.sh
 chmod u+x scripts/plink
-chmod u+x cassi-run.sh
+chmod u+x scripts/cassi-run.sh
 chmod u+x cassi/cassi
 
 export CURRENTDIR=`pwd`
