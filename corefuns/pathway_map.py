@@ -74,26 +74,26 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 				to_draw.append((p1,p1,'protective'))
 
 	## add PATHs
-	path_results = fdrPATH[fdrPATH['path2'] <= fdr_th ]
-	path_results = path_results.sort_values(kind='stable',by='path2')
-	path_groups = np.array(PATH_group_tmp[fdr_group])
-	unique_groups = np.unique(path_groups).shape[0]
-	for g in range(unique_groups):
-		tmp = np.where(path_groups==g)
-		if len(tmp[0]) > 0:
-			risk_type = False
-			path_id = tmp[0][0]
-			#wpm_row = wpms.iloc[bpm_id,:]
-			xid = path_results.index[path_id]
-			if xid > wpm_size:
-				risk_type = True
-				xid = xid - wpm_size
-			p1 = wpm['pathway'][xid]
-			used_pathways.append(p1)
-			if risk_type:
-				to_draw.append((p1,None,'risk'))
-			else:
-				to_draw.append((p1,None,'protective'))
+	#path_results = fdrPATH[fdrPATH['path2'] <= fdr_th ]
+	#path_results = path_results.sort_values(kind='stable',by='path2')
+	#path_groups = np.array(PATH_group_tmp[fdr_group])
+	#unique_groups = np.unique(path_groups).shape[0]
+	#for g in range(unique_groups):
+	#	tmp = np.where(path_groups==g)
+	#	if len(tmp[0]) > 0:
+	#		risk_type = False
+	#		path_id = tmp[0][0]
+	#		#wpm_row = wpms.iloc[bpm_id,:]
+	#		xid = path_results.index[path_id]
+	#		if xid > wpm_size:
+	#			risk_type = True
+	#			xid = xid - wpm_size
+	#		p1 = wpm['pathway'][xid]
+	#		used_pathways.append(p1)
+	#		if risk_type:
+	#			to_draw.append((p1,None,'risk'))
+	#		else:
+	#			to_draw.append((p1,None,'protective'))
 
 	## add BPMs based on the bpm limit
 	used_pathways = np.unique(used_pathways)
@@ -184,6 +184,9 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 			else:
 				adj_matrix[xid,yid] = -1
 				adj_matrix[yid,xid] = -1
+
+	if adj_matrix.shape[0] < 3:
+		return
 
 	# Draw
 	## Graph(map)

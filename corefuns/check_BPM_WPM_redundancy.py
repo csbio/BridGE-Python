@@ -4,6 +4,7 @@ import pickle
 from corefuns import bpmsim as bpmsim
 from corefuns import pathsim as pathsim
 from scipy import sparse
+import math
 
 
 
@@ -39,9 +40,11 @@ def check_BPM_WPM_redundancy(fdrBPM,fdrWPM,fdrPATH,bpmindfile,FDRcut):
 
     start = 0.05
     increment = 0.05
+    fdr_th = math.ceil(FDRcut/0.05)
 
     # Adding increment to FDRcut for inclusive arange.
-    for fdrcut in np.arange(start, FDRcut+increment, increment):
+    for f in range(1,fdr_th+1):
+        fdrcut = 0.05 * f
         ind = np.array(fdrBPM[fdrBPM<=fdrcut].dropna().index)
         nnz = (ind<=len(bpmind.bpm['size'])).sum()
 
