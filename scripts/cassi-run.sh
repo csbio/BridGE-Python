@@ -109,11 +109,11 @@ if [ -z "$net_id" ] ; then
         for i in `seq 1 $n` ;
         do
                 tmp_seed=$(($seed+$i))
-                plink --bfile $infile --seed $tmp_seed --make-perm-pheno 1 --out ${project_dir}/rand_pheno${net_id}
-                plink --bfile $infile --pheno ${project_dir}/rand_pheno${net_id}.pphe --mpheno 1 --make-bed --out ${infile}_R${net_id}
-                cassi -i ${infile}_R${net_id}.bed ${th_command} ${pval}  -max 0 -o ${project_dir}/${outfile}_R${net_id}.txt
-                python3 -m cassissm ${infile}.bim  ${project_dir}/${outfile}_R${net_id}.txt ${gi} ${project_dir}/${outfile}_R${net_id}.pkl
-                rm ${project_dir}/rand_pheno${net_id}.pphe
+                plink --bfile $infile --seed $tmp_seed --make-perm-pheno 1 --out ${project_dir}/rand_pheno${i}
+                plink --bfile $infile --pheno ${project_dir}/rand_pheno${i}.pphe --mpheno 1 --make-bed --out ${infile}_R${i}
+                cassi -i ${infile}_R${i}.bed ${th_command} ${pval}  -max 0 -o ${project_dir}/${outfile}_R${i}.txt
+                python3 -m cassissm ${infile}.bim  ${project_dir}/${outfile}_R${i}.txt ${gi} ${project_dir}/${outfile}_R${i}.pkl
+                rm ${project_dir}/rand_pheno${i}.pphe
         done
 else
         # find which network is being created
