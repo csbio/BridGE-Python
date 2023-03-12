@@ -80,7 +80,7 @@ if __name__ == '__main__':
 				project_dir = a
 			elif o == '--densityCutoff':
 				densitycutoff = float(a)
-			elif o == 'ssmfile':
+			elif o == '--ssmfile':
 				ssmfile = a
 
 
