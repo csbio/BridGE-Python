@@ -23,6 +23,7 @@ import copy
 import datetime
 sys.path.append('classes')
 import InteractionNetwork # for cassi pickle class
+np.seterr(divide='ignore', invalid='ignore')
 
 # genstats() computes BPM/WPM/PATH statistics. Can be run parallel.
 #

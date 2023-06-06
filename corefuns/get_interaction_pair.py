@@ -15,6 +15,7 @@ from classes import SNPdataclass
 from classes import InteractionNetwork
 from classes import genesetdataclass
 from corefuns import hygetest as ht
+np.seterr(divide='ignore', invalid='ignore')
 
 
 # get_interaction_pair() finds driver SNPs and genes for BPMs, WPMs. Figures out BPM or WPM by comparing path1 and path2 names.
