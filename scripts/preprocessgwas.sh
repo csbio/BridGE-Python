@@ -19,6 +19,8 @@ do
         --ldWindow=*) ldWindow=${argument/*=/""} ;;
         --ldShift=*) ldShift=${argument/*=/""} ;;
         --ldR2=*) ldR2=${argument/*=/""} ;;
+        --ldDprime=*) ldDprime=${argument/*=/""} ;;
+        --ldMeasure=*) ldMeasure=${argument/*=/""} ;;
         --help) _usage; exit;;
         esac
 done
@@ -33,7 +35,15 @@ if [ -z "${pihat}" ]; then pihat=0.2; fi
 if [ -z "${matchCC}" ]; then matchCC=1; fi
 if [ -z "${ldWindow}" ]; then ldWindow=50; fi
 if [ -z "${ldShift}" ]; then ldShift=5; fi
+if [ -z "${ldMeasure}" ]; then ldMeasure="R2"; fi     
 if [ -z "${ldR2}" ]; then ldR2=0.1; fi
+if [ -z "${ldDprime}" ]; then ldDprime=0.1; fi
+
+
+if [ "$ldMeasure" != "R2" ] && [ "$ldMeasure" != "DP" ]; then
+     echo "Wrong input for --ldMeasure, either use R2 or DP. Terminating ..."
+     exit 0
+fi
 
 DIRPATH=$(dirname "$plinkFile")
 plinkFile=${plinkFile##*/}
@@ -58,14 +68,20 @@ fi
 
 
 # get less redundant SNP set
-plink --bfile gwas_data_all --allow-no-sex \
-     --indep-pairwise ${ldWindow} ${ldShift} ${ldR2} --noweb \
-     --out gwas_data_all
+if [ "$ldMeasure" = "DP" ]; then
+     plink --bfile gwas_data_all --allow-no-sex \
+          --indep-pairphase ${ldWindow} ${ldShift} ${ldDprime} --noweb \
+          --out gwas_data_all 
+else
+     plink --bfile gwas_data_all --allow-no-sex \
+          --indep-pairwise ${ldWindow} ${ldShift} ${ldR2} --noweb \
+          --out gwas_data_all
+fi
 
 
 # generate new plink data
 plink --bfile gwas_data_all --allow-no-sex --extract gwas_data_all.prune.in \
-	--make-bed --out gwas_data_final
+     --make-bed --out gwas_data_final
 
 
 # conver plink to python readable
@@ -73,5 +89,6 @@ plink --bfile gwas_data_final --allow-no-sex --noweb --recodeA \
 	--out RecodeA_file
 
 mv RecodeA_file.raw gwas_data_final.raw
+
 rm *tmp*
 rm gwas_data_all.*
