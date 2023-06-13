@@ -88,7 +88,12 @@ plink --bfile gwas_data_all --allow-no-sex --extract gwas_data_all.prune.in \
 plink --bfile gwas_data_final --allow-no-sex --noweb --recodeA \
 	--out RecodeA_file
 
+# Compute all R2 pirwise data to later be used in get_interaction_list 
+plink --bfile gwas_data_final --r2 square
+
 mv RecodeA_file.raw gwas_data_final.raw
+
+
 
 rm *tmp*
 rm gwas_data_all.*

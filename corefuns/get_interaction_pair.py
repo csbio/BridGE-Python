@@ -43,7 +43,7 @@ def hygetest_caller(input_row):
 	return ht.hygetest(input_row[0],input_row[1],input_row[2],input_row[3])
 
 
-def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,snp2genefile,path_ids,densitycutoff=None):
+def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,snp2genefile,path_ids,fdrcutoff,densitycutoff=None):
 	pklin = open(snp2genefile,'rb')
 	snp2gene = pickle.load(pklin)
 	pklin = open(snp2pathwayfile,'rb')
@@ -78,6 +78,16 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	pklin = open(ssmfile,'rb')
 	int_network = pickle.load(pklin)
 
+	# load ld_file
+	ld_file = project_dir + '/plink.ld'
+	ld_provided = True
+	try:
+		ld_data = pd.read_csv(ld_file,header=None,index_col=False,sep='\t')
+		ld_data = ld_data.to_numpy()
+		#ld_data[ld_data<0.001] = 0
+	except FileNotFoundError:
+		ld_provided = False
+
 	# find score cutoffs if densitycutoff provided
 	if densitycutoff == None:
 		pos_cutoff = 0.2
@@ -92,6 +102,10 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	bpm_path1_drivers, bpm_path2_drivers = [], []
 	wpm_path_drivers = []
 	path_index = []
+
+	wpm_flag = False
+	interaction_table = pd.DataFrame(data=[],columns=['path1','path2','snp1','chr1','loc1','gene1','snp2','chr2','loc2','gene2','GI type','case frequency','control frequency','GI'
+		,'OR','effect','LD'])
 
 	for i_path in range(n):
 		pathname1 = path1.iloc[i_path][0]
@@ -125,6 +139,8 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			p_id1 = p_id2
 			p_id2 = tmp
 
+		if p_id1 == p_id2:
+			wpm_flag = True
 		## find pair bpm id
 		n_pairs = int(pathway_size * (pathway_size-1) / 2)
 		bpm_id = 0
@@ -223,6 +239,13 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		GT_type = []
 		freq_case = np.zeros(interaction_pairs)
 		freq_control = np.zeros(interaction_pairs)
+		chr1 = np.zeros(interaction_pairs)
+		chr2 = np.zeros(interaction_pairs)
+		pos1 = []
+		pos2 = []
+		ld = []
+
+
 		pheno = snpdataAD.pheno
 		pheno_size = pheno.shape[0]
 		snpdataAD1 = snpdataAD.data.iloc[:,ind1]
@@ -236,6 +259,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		pheno_nz = pheno_size - pheno_nnz
 		I = np.ones(pheno.shape)
 		res_pheno = I - pheno
+
 	
 		for k in range(interaction_pairs):
 			GI[k] = ssm_dis[i[k],j[k]]
@@ -329,12 +353,53 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 						freq_case[k] = freq_case_2
 						freq_control[k] = freq_control_2
 						snp_pair[:,k] = np.multiply(snpdataAD1.iloc[:,i[k]],snpdataAR2.iloc[:,j[k]])
+			# find base position and chromosome here
+			chr1[k] = snpdataAD.chr.iloc[ind1[i[k]]]
+			chr2[k] = snpdataAD.chr.iloc[ind2[j[k]]]
+			pos1.append(str(snpdataAD.loc[ind1[i[k]]]['loc']))
+			pos2.append(str(snpdataAD.loc[ind2[j[k]]]['loc']))
+			if ld_provided and chr1[k] == chr2[k]:
+				r2 = ld_data[ind1[i[k]],ind2[j[k]]]
+				#st = f"{float(r2):.3f}"
+				st = str(r2)
+				ld.append(st)
+			else:
+				ld.append('NA')
 
+
+
+
+
+
+		# compute odds ratio here based on the frequencies
+		odds_ratio = np.divide(np.multiply(1-freq_control,freq_case),np.multiply(1-freq_case,freq_control))
 
 		if model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined':
-			t = {'snp1': snps1, 'gene1': genes1, 'snp2': snps2 , 'gene2': genes2,'GI type': GT_type,'case frequency': freq_case,'control frequency': freq_control,'GI': GI}
-			output_pair = pd.DataFrame(data=t,columns=['snp1', 'gene1', 'snp2', 'gene2', 'GI type', 'case frequency', 'control frequency', 'GI' ])
+			t = {'snp1': snps1, 'chr1': chr1, 'loc1': pos1, 'gene1': genes1, 'snp2': snps2 , 'chr2': chr2, 'loc2':pos2,  'gene2': genes2,'GI type': GT_type,'case frequency': freq_case,'control frequency': freq_control,
+				'GI': GI,'OR': odds_ratio,'effect': effect, 'LD': ld}
+			output_pair = pd.DataFrame(data=t,columns=['snp1','chr1','loc1', 'gene1', 'snp2','chr2','loc2', 'gene2', 'GI type', 'case frequency', 'control frequency', 'GI',
+				'OR', 'effect', 'LD' ])
 			output_pair.sort_values('GI', ascending=False ,inplace=True)
+
+		# adding to the interaction table
+		n_prev = len(interaction_table)
+		tmp_path1 = interaction_table.loc[:,'path1']
+		tmp_path2 = interaction_table.loc[:,'path2']
+
+		interaction_table = pd.concat([interaction_table.loc[:],output_pair]).reset_index(drop=True)
+		interaction_table.loc[0:n_prev,'path1'] = tmp_path1.loc[:]
+		interaction_table.loc[0:n_prev,'path2'] = tmp_path2.loc[:]
+		interaction_table.loc[n_prev:,'path1'] = pathname1
+		interaction_table.loc[n_prev:,'path2'] = pathname2
+		# add effect similar to pathay names
+
+		
+
+
+
+
+
+
 
 		ind1 = np.array(ind1)
 		ind2 = np.array(ind2)
@@ -434,19 +499,23 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	bpm_path2_drivers = pd.DataFrame(bpm_path2_drivers, columns=['bpm_path2_drivers'],index = path_index)
 	wpm_path_drivers = pd.DataFrame(wpm_path_drivers, columns=['wpm_path_drivers'],index = path_index)
 
+	# write interaction list
+	# sort column order
+	#cols = interaction_table.columns.tolist()
+	#cols = cols[-2:] + cols[:-2]
+	#interaction_table = interaction_table[cols]
+	# construct the filename
+	st = f"{float(fdrcutoff):.2f}"
+	if wpm_flag:
+		list_file = project_dir + '/interaction_list_wpm_'+model+'_'+st+'.xlsx'
+	else:
+		list_file = project_dir + '/interaction_list_bpm_'+model+'_'+st+'.xlsx'
+	writer = pd.ExcelWriter(list_file)
+	interaction_table.to_excel(writer,index=False)
+	writer.save()
+
 	out_triple = [bpm_path1_drivers,bpm_path2_drivers,wpm_path_drivers]
 	return out_triple
-
-
-
-
-
-	
-	
-
-	
-
-
 	
 
 
