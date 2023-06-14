@@ -42,11 +42,13 @@ if __name__ == '__main__':
 
 	mds_data = mds_data.merge(pop_id_data,how='inner')
 	mds_data['population'] = (mds_data.iloc[:, 5:] == 1).idxmax(1)
+	mds_data.sort_values('population')
 
-	sns.scatterplot(data=mds_data,x='C1', y='C2', hue='population')
+	sns.scatterplot(data=mds_data,x='C1', y='C2', hue='population',marker="+",s=10)
 	plt.title("MDS plot colored by population")
 	plt.xlabel('C1')
 	plt.ylabel('C2')
+	plt.grid()
 	plt.savefig(outfile+'.pdf')
 	plt.close()
 

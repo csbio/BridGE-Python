@@ -46,54 +46,69 @@ if [ "$ldMeasure" != "R2" ] && [ "$ldMeasure" != "DP" ]; then
 fi
 
 DIRPATH=$(dirname "$plinkFile")
+# now using raw/ sub directory
+DIRPATH=$(dirname "$DIRPATH")
 plinkFile=${plinkFile##*/}
 cd $DIRPATH
 
-plink --bfile ${plinkFile} --noweb --allow-no-sex --mind ${mind} --geno ${geno} --maf ${maf} --hwe ${hwe} --make-bed --out ${plinkFile}_tmp0
+# create sub directories if do not alredy exist
 
-extractchr1-22.sh ${plinkFile}_tmp0 ${plinkFile}_tmp1
+if [ ! -d "intermediate" ]; then
+     mkdir intermediate
+fi
 
-excludenogenotypesnps.sh ${plinkFile}_tmp1 ${plinkFile}_tmp2
-removerelatedindividual.sh ${plinkFile}_tmp2 ${plinkFile}_tmp3 ${pihat}
+if [ ! -d "results" ]; then
+     mkdir results
+fi
+
+
+plink --bfile raw/${plinkFile} --noweb --allow-no-sex --mind ${mind} --geno ${geno} --maf ${maf} --hwe ${hwe} --make-bed --out intermediate/${plinkFile}_tmp0
+
+extractchr1-22.sh intermediate/${plinkFile}_tmp0 intermediate/${plinkFile}_tmp1
+
+excludenogenotypesnps.sh intermediate/${plinkFile}_tmp1 intermediate/${plinkFile}_tmp2
+removerelatedindividual.sh intermediate/${plinkFile}_tmp2 intermediate/${plinkFile}_tmp3 ${pihat}
 if [ "${matchCC}" -eq 1 ] 
 then
-     matchcasecontrol.sh ${plinkFile}_tmp3 gwas_data_all 
-     mv ${plinkFile}_tmp3.cluster1 PlinkFile.cluster1
-     mv ${plinkFile}_tmp3.cluster2 PlinkFile.cluster2
-     mv ${plinkFile}_tmp3.cluster2.orig PlinkFile.cluster2.orig
+     matchcasecontrol.sh intermediate/${plinkFile}_tmp3 intermediate/gwas_data_all 
+     mv intermediate/${plinkFile}_tmp3.cluster1 intermediate/PlinkFile.cluster1
+     mv intermediate/${plinkFile}_tmp3.cluster2 intermediate/PlinkFile.cluster2
+     mv intermediate/${plinkFile}_tmp3.cluster2.orig intermediate/PlinkFile.cluster2.orig
 else
-     plink --bfile ${plinkFile}_tmp3 --make-bed --out gwas_data_all
+     plink --bfile intermediate/${plinkFile}_tmp3 --make-bed --out intermediate/gwas_data_all
 fi
 
 
 
 # get less redundant SNP set
 if [ "$ldMeasure" = "DP" ]; then
-     plink --bfile gwas_data_all --allow-no-sex \
+     plink --bfile intermediate/gwas_data_all --allow-no-sex \
           --indep-pairphase ${ldWindow} ${ldShift} ${ldDprime} --noweb \
-          --out gwas_data_all 
+          --out intermediate/gwas_data_all 
 else
-     plink --bfile gwas_data_all --allow-no-sex \
+     plink --bfile intermediate/gwas_data_all --allow-no-sex \
           --indep-pairwise ${ldWindow} ${ldShift} ${ldR2} --noweb \
-          --out gwas_data_all
+          --out intermediate/gwas_data_all
 fi
 
 
 # generate new plink data
-plink --bfile gwas_data_all --allow-no-sex --extract gwas_data_all.prune.in \
-     --make-bed --out gwas_data_final
+plink --bfile intermediate/gwas_data_all --allow-no-sex --extract intermediate/gwas_data_all.prune.in \
+     --make-bed --out intermediate/gwas_data_final
 
 
 # conver plink to python readable
-plink --bfile gwas_data_final --allow-no-sex --noweb --recodeA \
-	--out RecodeA_file
+plink --bfile intermediate/gwas_data_final --allow-no-sex --noweb --recodeA \
+	--out intermediate/RecodeA_file
 
 # Compute all R2 pirwise data to later be used in get_interaction_list 
-plink --bfile gwas_data_final --r2 square
+plink --bfile intermediate/gwas_data_final --r2 square
 
-mv RecodeA_file.raw gwas_data_final.raw
+mv intermediate/RecodeA_file.raw intermediate/gwas_data_final.raw
+mv plink.ld intermediate/plink.ld
 
 
 
-rm *tmp*
-rm gwas_data_all.*
+rm intermediate/*tmp*
+rm intermediate/gwas_data_all.*
+rm plink*

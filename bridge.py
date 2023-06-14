@@ -93,23 +93,23 @@ if __name__ == '__main__':
 		## convert plinkfile to pickle
 		if plinkfile == '':
 			sys.exit('plinkFile not provided')
-		rawfile = project_dir + '/' + plinkfile + '.raw'
-		bimfile = project_dir + '/' + plinkfile + '.bim'
-		famfile = project_dir + '/' + plinkfile + '.fam'
+		rawfile = project_dir + '/intermediate/' + plinkfile + '.raw'
+		bimfile = project_dir + '/intermediate/' + plinkfile + '.bim'
+		famfile = project_dir + '/intermediate/' + plinkfile + '.fam'
 		if not path.exists(rawfile) or not path.exists(bimfile) or not path.exists(famfile):
 			sys.exit('plinkFiles do not exist')
-		finalfile = project_dir + '/' + plinkfile + '.pkl'
+		finalfile = project_dir + '/intermediate/' + plinkfile + '.pkl'
 		p2p.plink2pkl(rawfile, bimfile, famfile, finalfile)
 		## converting snp data assuming different disease models
 		ba.bindataa(project_dir,finalfile,'r')
 		ba.bindataa(project_dir,finalfile,'d')
-		symbolsFile = project_dir + '/' + genesets + '.symbols.gmt'
-		entrezFile = project_dir + '/'+ genesets + '.entrez.gmt'
+		symbolsFile = project_dir + '/raw/' + genesets + '.symbols.gmt'
+		entrezFile = project_dir + '/raw/'+ genesets + '.entrez.gmt'
 		if not path.exists(symbolsFile) or not path.exists(entrezFile):
 			sys.exit('genesets do not exist')
 		## prepare gene set information
 		msig2p.msigdb2pkl(symbolsFile, entrezFile)
-		gene_annotation	= project_dir +	'/' + gene_annotation
+		gene_annotation	= project_dir +	'/raw/' + gene_annotation
 		sys.stdout.flush()
 		if not path.exists(gene_annotation):
 			sys.exit('gene annotation file not found')
@@ -121,17 +121,17 @@ if __name__ == '__main__':
 		## build relationship between snps and genes
 		snp2gene.mapsnp2gene(bimfile, gene_annotation, mappingDistance, 'matrix', sgmfile) # matrix mode - #change
 		## extract snp-pathway information
-		geneset_pkl = project_dir + '/' + genesets + '.pkl'
+		geneset_pkl = project_dir + '/intermediate/' + genesets + '.pkl'
 		outfile = snpp.snppathway(finalfile, sgmfile, geneset_pkl, minPath, maxPath)
 		bpm.bpmind(outfile)
 	elif job == 'ComputeInteraction':
 		## Validating input parameters
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined'):
 			sys.exit('wrong model')
-		if not path.exists(project_dir+'/SNPdataAD.pkl'):
-			sys.exit(project_dir+'/SNPdataAD.pkl not found')
-		if not path.exists(project_dir+'/SNPdataAR.pkl'):
-			sys.exit(project_dir+'/SNPdataAR.pkl not found')
+		if not path.exists(project_dir+'/intermediate/SNPdataAD.pkl'):
+			sys.exit(project_dir+'/intermediate/SNPdataAD.pkl not found')
+		if not path.exists(project_dir+'/intermediate/SNPdataAR.pkl'):
+			sys.exit(project_dir+'/intermediate/SNPdataAR.pkl not found')
 		if model == 'combined':
 			ci.combine(project_dir,alpha1,alpha2,n_workers,i)
 		else:
@@ -140,44 +140,44 @@ if __name__ == '__main__':
 	elif job == 'ComputeStats':
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined' or ssmfile != None):
 			sys.exit('wrong model')
-		bpmfile = project_dir+'/BPMind.pkl'
+		bpmfile = project_dir+'/intermediate/BPMind.pkl'
 		if not path.exists(bpmfile):
-			sys.exit(project_dir+'/BPMind.pkl not found')
-		if not path.exists(project_dir+'/SNPdataAD.pkl'):
-                	sys.exit(project_dir+'/SNPdataAD.pkl not found')
-		if not path.exists(project_dir+'/SNPdataAR.pkl'):
-                	sys.exit(project_dir+'/SNPdataAR.pkl not found')
+			sys.exit(project_dir+'/intermediate/BPMind.pkl not found')
+		if not path.exists(project_dir+'/intermediate/SNPdataAD.pkl'):
+                	sys.exit(project_dir+'/intermediate/SNPdataAD.pkl not found')
+		if not path.exists(project_dir+'/intermediate/SNPdataAR.pkl'):
+                	sys.exit(project_dir+'/intermediate/SNPdataAR.pkl not found')
 		if ssmfile == None:
 			if model == 'combined':
 				#ci.combine(alpha1,alpha2,n_workers,R)
 				# build ssM file name
-				ssmfile = project_dir+'/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
+				ssmfile = project_dir+'/intermediate/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
 			else:
 				#ci.run(model,alpha1,alpha2,n_workers,R)	
-				ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
+				ssmfile = project_dir+'/intermediate/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
 		else:
-			ssmfile = project_dir+'/'+ssmfile
+			ssmfile = project_dir+'/intermediate/'+ssmfile
 		gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers,densitycutoff)
 
 	elif job == 'ComputeFDR':
-		bpmfile = project_dir+'/BPMind.pkl'
+		bpmfile = project_dir+'/intermediate/BPMind.pkl'
 		if not path.exists(bpmfile):
-			sys.exit(project_dir+'/BPMind.pkl not found')
+			sys.exit(project_dir+'/intermediate/BPMind.pkl not found')
 		if ssmfile == None:
 			if model == 'combined':
-				ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
+				ssmfile = project_dir+'/intermediate/ssM_mhygessi_combined_R0.pkl'
 			else:
-				ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R0.pkl'
+				ssmfile = project_dir+'/intermediate/ssM_mhygessi_' + model + '_R0.pkl'
 		else:
-			ssmfile = project_dir+'/'+ssmfile
+			ssmfile = project_dir+'/intermediate/'+ssmfile
 		if not path.exists(ssmfile):
 			sys.exit(ssmfile+' not found')
 		fdr.fdrsampleperm(ssmfile, bpmfile, pval_cutoff, minPath, sample_perms)
 	elif job == 'Summarize':
-		bpmfile = project_dir+'/BPMind.pkl'
-		snppathwayfile = project_dir+ '/' + snppathwayfile
+		bpmfile = project_dir+'/intermediate/BPMind.pkl'
+		snppathwayfile = project_dir+ '/intermediate/intermediate/' + snppathwayfile
 		#snpgenemappingfile  = 'data/snpgenemapping_50kb.pkl'
-		snpgenemappingfile = project_dir+'/snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
+		snpgenemappingfile = project_dir+'/intermediate/snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
 		validationfile = None
 		if not path.exists(bpmfile):
 			sys.exit('bpm file not found at:'+bpmfile)
@@ -187,14 +187,14 @@ if __name__ == '__main__':
 			sys.exit('snpgenemappingfile not found, check mapping Distance arg')
 		if ssmfile == None:
 			if model == 'combined':
-				ssmfile = project_dir+'/ssM_mhygessi_combined_R0.pkl'
-				resultsfile = project_dir+'/results_ssM_mhygessi_combined_R0.pkl'
+				ssmfile = project_dir+'/intermediate/ssM_mhygessi_combined_R0.pkl'
+				resultsfile = project_dir+'/intermediate/results_ssM_mhygessi_combined_R0.pkl'
 			else:
-				ssmfile = project_dir+'/ssM_mhygessi_' + model + '_R0.pkl'
-				resultsfile = project_dir+'/results_ssM_mhygessi_'+model +'_R0.pkl'
+				ssmfile = project_dir+'/intermediate/ssM_mhygessi_' + model + '_R0.pkl'
+				resultsfile = project_dir+'/intermediate/results_ssM_mhygessi_'+model +'_R0.pkl'
 		else:
-			resultsfile = project_dir+'/results_'+ ssmfile
-			ssmfile = project_dir+'/'+ssmfile
+			resultsfile = project_dir+'/intermediate/results_'+ ssmfile
+			ssmfile = project_dir+'/intermediate/'+ssmfile
 		if not path.exists(ssmfile):
 			sys.exit('interaction file not found, check model arg')
 		if not path.exists(resultsfile):

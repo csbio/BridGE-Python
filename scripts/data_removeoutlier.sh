@@ -67,13 +67,14 @@ if [ -z "${x1}" ] || [ -z "${x2}" ] || [ -z "${y1}" ] || [ -z "${y2}" ]; then
 fi
 
 DIRPATH=$(dirname "$plinkFile")
+DIRPATH=$(dirname "$DIRPATH")
 plinkFile=${plinkFile##*/}
 mdsFile=${mdsFile##*/}
 cd $DIRPATH
 
-awk -v X1=${x1} -v X2=${x2} -v Y1=${y1} -v Y2=${y2} '$4 >= X1 && $4 <= X2 && $5 >= Y1 && $5 <= Y2 ' ${mdsFile} | awk '{print $1,$2}' > tmp_sample2keep
+awk -v X1=${x1} -v X2=${x2} -v Y1=${y1} -v Y2=${y2} '$4 >= X1 && $4 <= X2 && $5 >= Y1 && $5 <= Y2 ' intermediate/${mdsFile} | awk '{print $1,$2}' > tmp_sample2keep
 
-plink --bfile ${plinkFile} --keep tmp_sample2keep --allow-no-sex --make-bed --out ${plinkFile}.rmoutlier
+plink --bfile raw/${plinkFile} --keep tmp_sample2keep --allow-no-sex --make-bed --out raw/${plinkFile}.rmoutlier
 
 rm tmp_sample2keep
 

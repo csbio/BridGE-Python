@@ -293,12 +293,12 @@ def parallel_run(job_arg):
 def run(project_dir,model,alpha1,alpha2,n_workers,R):
 	print('computing interacttion. R='+str(R)+' model = '+model)
 	## output name
-	output_name = project_dir+'/ssM_mhygessi_'+ model+'_R'+str(R) + '.pkl'
-	cluster_file = project_dir+'/PlinkFile.cluster2'
+	output_name = project_dir+'/intermediate/ssM_mhygessi_'+ model+'_R'+str(R) + '.pkl'
+	cluster_file = project_dir+'/intermediate/PlinkFile.cluster2'
 	
 	# loading and reading SNP data
-	pkl_d = open(project_dir+'/SNPdataAD.pkl','rb')
-	pkl_r = open(project_dir+'/SNPdataAR.pkl','rb')
+	pkl_d = open(project_dir+'/intermediate/SNPdataAD.pkl','rb')
+	pkl_r = open(project_dir+'/intermediate/SNPdataAR.pkl','rb')
 	snpdata_d = pickle.load(pkl_d)
 	snpdata_r = pickle.load(pkl_r)
 	pkl_d.close()
@@ -326,7 +326,7 @@ def run(project_dir,model,alpha1,alpha2,n_workers,R):
 				permuted_idx = numpy.random.permutation(population_size)
 			pheno = pheno[permuted_idx]
 		else:
-			pheno = wrand.withinclassrand(R,cluster_file,project_dir+'/SNPdataAD.pkl')
+			pheno = wrand.withinclassrand(R,cluster_file,project_dir+'/intermediate/SNPdataAD.pkl')
 
 	case_size = numpy.count_nonzero(pheno)
 	control_size = population_size - case_size
@@ -418,16 +418,16 @@ def run(project_dir,model,alpha1,alpha2,n_workers,R):
 
 # if the disease model is combined, this function is called and it calls run() itself
 def combine(project_dir,alpha1,alpha2,n_workers,R):
-	output_name = project_dir+'/ssM_mhygessi_'+ 'combined_R'+str(R) + '.pkl'
+	output_name = project_dir+'/intermediate/ssM_mhygessi_'+ 'combined_R'+str(R) + '.pkl'
 	## run for 3 models
 	run(project_dir,'RR',alpha1,alpha2,n_workers,R)
 	run(project_dir,'RD',alpha1,alpha2,n_workers,R)
 	run(project_dir,'DD',alpha1,alpha2,n_workers,R)
 
 	## load results for 3 models
-	rr_file = project_dir+'/ssM_mhygessi_'+ 'RR_R'+str(R) + '.pkl'
-	rd_file = project_dir+'/ssM_mhygessi_'+ 'RD_R'+str(R) + '.pkl'
-	dd_file = project_dir+'/ssM_mhygessi_'+ 'DD_R'+str(R) + '.pkl'
+	rr_file = project_dir+'/intermediate/ssM_mhygessi_'+ 'RR_R'+str(R) + '.pkl'
+	rd_file = project_dir+'/intermediate/ssM_mhygessi_'+ 'RD_R'+str(R) + '.pkl'
+	dd_file = project_dir+'/intermediate/ssM_mhygessi_'+ 'DD_R'+str(R) + '.pkl'
 	pklin = open(rr_file,'rb')
 	rr_network = pickle.load(pklin)
 	pklin.close()

@@ -31,7 +31,7 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 	fdrPATH = fdrPATH.iloc[ind_path.index]
 	
 	# load BPMind.pkl file
-	bpm_file = project_dir + '/BPMind.pkl'
+	bpm_file = project_dir + '/intermediate/BPMind.pkl'
 	pklin = open(bpm_file,'rb')
 	bpm_data = pickle.load(pklin)
 	pklin.close()
@@ -264,7 +264,7 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 	ssmfile = tmp[1]
 	tmp = ssmfile.split('.pkl')
 	ssmfile = tmp[0]
-	pp = PdfPages(project_dir+'/network-map-'+ssmfile+'.pdf')
+	pp = PdfPages(project_dir+'/results/network-map-'+ssmfile+'.pdf')
 	fig_nums = plt.get_fignums()
 	figs = [plt.figure(n) for n in fig_nums]
 	for fig in figs:

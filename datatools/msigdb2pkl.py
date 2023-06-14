@@ -71,6 +71,7 @@ def msigdb2pkl(symbolsFile, entrezFile):
     # Converting data to pickle storage file with geneset class.
     geneset = gsc.genesetclass(symboldict, gpm)
     symbolsFile = symbolsFile.replace(".symbols.gmt", ".pkl")
+    symbolsFile = symbolsFile.replace("raw/", "intermediate/")
     final = open(symbolsFile, 'wb')
     pickle.dump(geneset, final)
     final.close()

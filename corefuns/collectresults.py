@@ -41,7 +41,7 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
     # Find project dir
     dir_sp = resultsfile.split('/')
     s = '/'
-    project_dir = s.join(dir_sp[:-1])
+    project_dir = s.join(dir_sp[:-2])
 
     fdrBPM, fdrWPM, fdrPATH = rfd.fdrbpm2, rfd.fdrwpm2, rfd.fdrpath2
     bpm_pv, wpm_pv, path_pv = rfd.bpm_pv, rfd.wpm_pv, rfd.path_pv
@@ -332,7 +332,7 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
 
 
     final_filename = resultsfile.split('/').pop()
-    final_filename = project_dir + "/output_" +  final_filename.rsplit('.',1)[0] + ".xls"
+    final_filename = project_dir + "results/output_" +  final_filename.rsplit('.',1)[0] + ".xls"
 
 
     #### DOUBLE CHECK SORTING WHEN FIXING BPMSIM AND PATHSIM. ####
