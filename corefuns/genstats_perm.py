@@ -18,7 +18,7 @@ import gc
 import time
 import multiprocessing as mp
 from multiprocessing import sharedctypes
-import os, psutil
+import os
 import copy
 import datetime
 sys.path.append('classes')

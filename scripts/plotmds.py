@@ -42,9 +42,14 @@ if __name__ == '__main__':
 
 	mds_data = mds_data.merge(pop_id_data,how='inner')
 	mds_data['population'] = (mds_data.iloc[:, 5:] == 1).idxmax(1)
-	mds_data.sort_values('population')
+	#mds_data.sort_values('population')
+	study_points = mds_data[mds_data['population'] == 'StudyPop']
+	other_points = mds_data[mds_data['population'] != 'StudyPop']
+	mds_new = pd.concat([study_points,other_points])
 
-	sns.scatterplot(data=mds_data,x='C1', y='C2', hue='population',marker="+",s=10)
+	#study_plot = sns.scatterplot(data=study_points,x='C1', y='C2',marker="+",s=40, label='StudyPop')
+	sns.scatterplot(data=mds_new,x='C1', y='C2',hue='population',marker="+",s=40)
+
 	plt.title("MDS plot colored by population")
 	plt.xlabel('C1')
 	plt.ylabel('C2')
