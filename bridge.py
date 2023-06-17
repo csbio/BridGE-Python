@@ -175,7 +175,7 @@ if __name__ == '__main__':
 		fdr.fdrsampleperm(ssmfile, bpmfile, pval_cutoff, minPath, sample_perms)
 	elif job == 'Summarize':
 		bpmfile = project_dir+'/intermediate/BPMind.pkl'
-		snppathwayfile = project_dir+ '/intermediate/intermediate/' + snppathwayfile
+		snppathwayfile = project_dir+ '/intermediate/' + snppathwayfile
 		#snpgenemappingfile  = 'data/snpgenemapping_50kb.pkl'
 		snpgenemappingfile = project_dir+'/intermediate/snpgenemapping_' + str(int(mappingDistance/1000)) + 'kb.pkl'
 		validationfile = None
