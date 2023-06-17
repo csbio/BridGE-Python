@@ -332,7 +332,7 @@ def collectresults(resultsfile,fdrcut,ssmfile,bpmindfile,snppathwayfile,snpgenem
 
 
     final_filename = resultsfile.split('/').pop()
-    final_filename = project_dir + "results/output_" +  final_filename.rsplit('.',1)[0] + ".xls"
+    final_filename = project_dir + "/results/output_" +  final_filename.rsplit('.',1)[0] + ".xls"
 
 
     #### DOUBLE CHECK SORTING WHEN FIXING BPMSIM AND PATHSIM. ####

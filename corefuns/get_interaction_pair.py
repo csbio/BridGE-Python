@@ -59,7 +59,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	# Find project dir
 	dir_sp = snp2pathwayfile.split('/')
 	s = '/'
-	project_dir = s.join(dir_sp[:-1])
+	project_dir = s.join(dir_sp[:-2])
 
 
 	geneset_file = snp2path.geneset
@@ -68,10 +68,10 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 
 
 	## load snp data
-	pklin = open(project_dir+'/SNPdataAD.pkl','rb')
+	pklin = open(project_dir+'/intermediate/SNPdataAD.pkl','rb')
 	snpdataAD = pickle.load(pklin)
 
-	pklin = open(project_dir+'/SNPdataAR.pkl','rb')
+	pklin = open(project_dir+'/intermediate/SNPdataAR.pkl','rb')
 	snpdataAR = pickle.load(pklin)
 
 	#load interaction network
@@ -79,7 +79,7 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	int_network = pickle.load(pklin)
 
 	# load ld_file
-	ld_file = project_dir + '/plink.ld'
+	ld_file = project_dir + '/intermediate/plink.ld'
 	ld_provided = True
 	try:
 		ld_data = pd.read_csv(ld_file,header=None,index_col=False,sep='\t')
@@ -103,6 +103,9 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	wpm_path_drivers = []
 	path_index = []
 
+	# Create a dictionary of formatting options
+	format_options = {'float_format': lambda x: '{:.3f}'.format(x) if x >= 0.001 else '{:.3e}'.format(x)}
+
 	wpm_flag = False
 	interaction_table = pd.DataFrame(data=[],columns=['path1','path2','snp1','chr1','loc1','gene1','snp2','chr2','loc2','gene2','GI type','case frequency','control frequency','GI'
 		,'OR','effect','LD'])
@@ -124,7 +127,6 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 
 		ssm_pr = ssmfile.split('.')
 		model = ssm_pr[0].split('_')[-2]
-
 
 
 
@@ -361,7 +363,8 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 			if ld_provided and chr1[k] == chr2[k]:
 				r2 = ld_data[ind1[i[k]],ind2[j[k]]]
 				#st = f"{float(r2):.3f}"
-				st = str(r2)
+				st = format_options['float_format'](r2)
+				#st = str(r2)
 				ld.append(st)
 			else:
 				ld.append('NA')
@@ -507,12 +510,25 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	# construct the filename
 	st = f"{float(fdrcutoff):.2f}"
 	if wpm_flag:
-		list_file = project_dir + '/interaction_list_wpm_'+model+'_'+st+'.xlsx'
+		list_file = project_dir + '/results/interaction_list_wpm_'+model+'_'+st+'.xlsx'
 	else:
-		list_file = project_dir + '/interaction_list_bpm_'+model+'_'+st+'.xlsx'
-	writer = pd.ExcelWriter(list_file)
-	interaction_table.to_excel(writer,index=False)
-	writer.save()
+		list_file = project_dir + '/results/interaction_list_bpm_'+model+'_'+st+'.xlsx'
+
+	#with pd.ExcelWriter(
+	#	list_file,
+	#	engine='xlsxwriter',
+	#	options={'float_format': format_options['float_format']}
+	#) as writer:
+	#	interaction_table.to_excel(writer,index=False)
+	#	writer.save()
+
+	writer = pd.ExcelWriter(list_file,engine='xlsxwriter')
+	interaction_table.to_excel(writer, index=False, sheet_name='Sheet1')
+	workbook  = writer.book
+	worksheet = writer.sheets['Sheet1']
+	format1 = workbook.add_format({'num_format': '0.000'})
+	worksheet.set_column('L:P', None, format1)
+	writer.save() 
 
 	out_triple = [bpm_path1_drivers,bpm_path2_drivers,wpm_path_drivers]
 	return out_triple
