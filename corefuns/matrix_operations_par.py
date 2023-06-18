@@ -291,7 +291,7 @@ def parallel_run(job_arg):
 
 
 def run(project_dir,model,alpha1,alpha2,n_workers,R):
-	print('computing interacttion. R='+str(R)+' model = '+model)
+	print('computing interaction. R='+str(R)+' model = '+model)
 	## output name
 	output_name = project_dir+'/intermediate/ssM_mhygessi_'+ model+'_R'+str(R) + '.pkl'
 	cluster_file = project_dir+'/intermediate/PlinkFile.cluster2'

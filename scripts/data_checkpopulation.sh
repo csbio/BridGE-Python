@@ -21,7 +21,7 @@ $*
   --prj1000Pop=PRJ1000POP
        1000 genome project population
        There too many populations in the project
-       Only CEU, CHB, JPI and ASW populations will be plotted
+       Only CEU, CHB, YRI and ASW populations will be plotted
        The is to make sure the population of study data will be included 
        population code at https://www.internationalgenome.org/category/population/
        CEU: European
@@ -90,13 +90,13 @@ fi
 
 plink --bfile ${prj1000File} --extract raw/${plinkFile}.bim --allow-no-sex --make-bed --out intermediate/prj1000_tmp0 > /dev/null
 
-# only keep CEU, CHB, JPI and ASW populations
+# only keep CEU, CHB, YRI and ASW populations
 grep -w CEU ${popIDFile} | awk '{print $1 "\t" $2}' > intermediate/sublist.tmp
 grep -w CHB ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
 grep -w ASW ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
 grep -w YRI ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
 
-# add ${prj1000Pop} if it's not in CEU, CHB, JPI and ASW 
+# add ${prj1000Pop} if it's not in CEU, CHB, YRI and ASW 
 if [[ ! "${prj1000Pop}" =~ ^(CEU|CHB|ASW|YRI)$ ]]; then 
      grep -w ${prj1000Pop} ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
 fi
@@ -133,9 +133,9 @@ done
 
 # genereate population idex
 z=0
-for i in `echo CEU CHB JPI ASW ${prj1000Pop} | xargs -n1 | sort -u | xargs`; do z=`echo ${z} 0`; done
+for i in `echo CEU CHB ASW YRI ${prj1000Pop} | xargs -n1 | sort -u | xargs`; do z=`echo ${z} 0`; done
 
-echo `echo CEU CHB JPI ASW ${prj1000Pop} | xargs -n1 | sort -u | xargs` StudyPop > intermediate/allpopid.txt
+echo `echo CEU CHB ASW YRI ${prj1000Pop} | xargs -n1 | sort -u | xargs` StudyPop > intermediate/allpopid.txt
 
 while read line
 do

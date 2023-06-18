@@ -33,6 +33,7 @@ if __name__ == '__main__':
 	binaryNetwork = False
 	snpPerms = 10000
 	i = -1
+	r = -1
 	pval_cutoff = 0.05
 	fdrcut = 0.25
 	densitycutoff = None
@@ -82,6 +83,8 @@ if __name__ == '__main__':
 				densitycutoff = float(a)
 			elif o == '--ssmfile':
 				ssmfile = a
+			elif o == '--R':
+				r = int(a) 
 
 
 	# First module: Data processing
@@ -132,10 +135,17 @@ if __name__ == '__main__':
 			sys.exit(project_dir+'/intermediate/SNPdataAD.pkl not found')
 		if not path.exists(project_dir+'/intermediate/SNPdataAR.pkl'):
 			sys.exit(project_dir+'/intermediate/SNPdataAR.pkl not found')
-		if model == 'combined':
-			ci.combine(project_dir,alpha1,alpha2,n_workers,i)
-		else:
-			ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
+		if r < 0 :
+			if model == 'combined':
+				ci.combine(project_dir,alpha1,alpha2,n_workers,i)
+			else:
+				ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
+			else:
+				for i in range(r+1):
+					if model == 'combined':
+						ci.combine(project_dir,alpha1,alpha2,n_workers,i)
+					else:
+						ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
 
 	elif job == 'ComputeStats':
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined' or ssmfile != None):
@@ -148,13 +158,25 @@ if __name__ == '__main__':
 		if not path.exists(project_dir+'/intermediate/SNPdataAR.pkl'):
                 	sys.exit(project_dir+'/intermediate/SNPdataAR.pkl not found')
 		if ssmfile == None:
-			if model == 'combined':
-				#ci.combine(alpha1,alpha2,n_workers,R)
-				# build ssM file name
-				ssmfile = project_dir+'/intermediate/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
+			if r < 0:
+				if model == 'combined':
+					#ci.combine(alpha1,alpha2,n_workers,R)
+					# build ssM file name
+					ssmfile = project_dir+'/intermediate/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
+				else:
+					#ci.run(model,alpha1,alpha2,n_workers,R)	
+					ssmfile = project_dir+'/intermediate/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
+				gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers,densitycutoff)
 			else:
-				#ci.run(model,alpha1,alpha2,n_workers,R)	
-				ssmfile = project_dir+'/intermediate/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
+				for i in range(r+1):
+					if model == 'combined':
+						#ci.combine(alpha1,alpha2,n_workers,R)
+						# build ssM file name
+						ssmfile = project_dir+'/intermediate/ssM_mhygessi_combined_R'+ str(i) + '.pkl'
+					else:
+						#ci.run(model,alpha1,alpha2,n_workers,R)	
+						ssmfile = project_dir+'/intermediate/ssM_mhygessi_' + model + '_R'+ str(i) + '.pkl'
+					gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers,densitycutoff)
 		else:
 			ssmfile = project_dir+'/intermediate/'+ssmfile
 		gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers,densitycutoff)
