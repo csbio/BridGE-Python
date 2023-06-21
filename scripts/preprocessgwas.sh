@@ -19,8 +19,6 @@ do
         --ldWindow=*) ldWindow=${argument/*=/""} ;;
         --ldShift=*) ldShift=${argument/*=/""} ;;
         --ldR2=*) ldR2=${argument/*=/""} ;;
-        --ldDprime=*) ldDprime=${argument/*=/""} ;;
-        --ldMeasure=*) ldMeasure=${argument/*=/""} ;;
         --help) _usage; exit;;
         esac
 done
@@ -34,16 +32,11 @@ if [ -z "${hwe}" ]; then hwe=0.000001; fi
 if [ -z "${pihat}" ]; then pihat=0.2; fi
 if [ -z "${matchCC}" ]; then matchCC=1; fi
 if [ -z "${ldWindow}" ]; then ldWindow=50; fi
-if [ -z "${ldShift}" ]; then ldShift=5; fi
-if [ -z "${ldMeasure}" ]; then ldMeasure="R2"; fi     
+if [ -z "${ldShift}" ]; then ldShift=5; fi   
 if [ -z "${ldR2}" ]; then ldR2=0.1; fi
-if [ -z "${ldDprime}" ]; then ldDprime=0.1; fi
+#if [ -z "${ldDprime}" ]; then ldDprime=0.1; fi
 
 
-if [ "$ldMeasure" != "R2" ] && [ "$ldMeasure" != "DP" ]; then
-     echo "Wrong input for --ldMeasure, either use R2 or DP. Terminating ..."
-     exit 0
-fi
 
 DIRPATH=$(dirname "$plinkFile")
 # now using raw/ sub directory
@@ -80,24 +73,17 @@ fi
 
 
 
-# get less redundant SNP set
-if [ "$ldMeasure" = "DP" ]; then
-     plink --bfile intermediate/gwas_data_all --allow-no-sex \
-          --indep-pairphase ${ldWindow} ${ldShift} ${ldDprime} --noweb \
-          --out intermediate/gwas_data_all 
-else
-     plink --bfile intermediate/gwas_data_all --allow-no-sex \
-          --indep-pairwise ${ldWindow} ${ldShift} ${ldR2} --noweb \
-          --out intermediate/gwas_data_all
-fi
-
+# get less redundant SNP set based on R2
+plink --bfile intermediate/gwas_data_all --allow-no-sex \
+     --indep-pairwise ${ldWindow} ${ldShift} ${ldR2} --noweb \
+     --out intermediate/gwas_data_all
 
 # generate new plink data
 plink --bfile intermediate/gwas_data_all --allow-no-sex --extract intermediate/gwas_data_all.prune.in \
      --make-bed --out intermediate/gwas_data_final
 
 
-# conver plink to python readable
+# convert plink to python readable
 plink --bfile intermediate/gwas_data_final --allow-no-sex --noweb --recodeA \
 	--out intermediate/RecodeA_file
 

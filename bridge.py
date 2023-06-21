@@ -140,12 +140,12 @@ if __name__ == '__main__':
 				ci.combine(project_dir,alpha1,alpha2,n_workers,i)
 			else:
 				ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
-			else:
-				for i in range(r+1):
-					if model == 'combined':
-						ci.combine(project_dir,alpha1,alpha2,n_workers,i)
-					else:
-						ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
+		else:
+			for i in range(r+1):
+				if model == 'combined':
+					ci.combine(project_dir,alpha1,alpha2,n_workers,i)
+				else:
+					ci.run(project_dir,model,alpha1,alpha2,n_workers,i)
 
 	elif job == 'ComputeStats':
 		if not (model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined' or ssmfile != None):
@@ -154,9 +154,9 @@ if __name__ == '__main__':
 		if not path.exists(bpmfile):
 			sys.exit(project_dir+'/intermediate/BPMind.pkl not found')
 		if not path.exists(project_dir+'/intermediate/SNPdataAD.pkl'):
-                	sys.exit(project_dir+'/intermediate/SNPdataAD.pkl not found')
+			sys.exit(project_dir+'/intermediate/SNPdataAD.pkl not found')
 		if not path.exists(project_dir+'/intermediate/SNPdataAR.pkl'):
-                	sys.exit(project_dir+'/intermediate/SNPdataAR.pkl not found')
+			sys.exit(project_dir+'/intermediate/SNPdataAR.pkl not found')
 		if ssmfile == None:
 			if r < 0:
 				if model == 'combined':

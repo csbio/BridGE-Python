@@ -7,7 +7,7 @@ dependencies:
   - _openmp_mutex=4.5=2_gnu
   - brotli=1.0.9=h5eee18b_7
   - brotli-bin=1.0.9=h5eee18b_7
-  - ca-certificates=2023.01.10=h06a4308_0
+  - ca-certificates=2023.05.30=h06a4308_0
   - contourpy=1.0.5=py38hdb19cb5_0
   - cycler=0.11.0=pyhd3eb1b0_0
   - cython=0.29.33=py38h8dc9893_0
@@ -56,12 +56,13 @@ dependencies:
   - ncurses=6.3=h27087fc_1
   - networkx=2.8.8=pyhd8ed1ab_0
   - numpy=1.19.5=py38h8246c76_3
-  - openssl=1.1.1t=h7f8727e_0
+  - openssl=1.1.1u=h7f8727e_0
   - packaging=22.0=py38h06a4308_0
   - pandas=1.1.1=py38h950e882_0
   - pcre=8.45=h295c915_0
   - pillow=9.3.0=py38h6a678d5_2
   - pip=23.0.1=pyhd8ed1ab_0
+  - psutil=5.9.4=py38h0a891b7_0
   - pyparsing=3.0.9=py38h06a4308_0
   - pyqt=5.9.2=py38h05f1152_4
   - python=3.8.3=cpython_he5300dc_0
@@ -71,6 +72,7 @@ dependencies:
   - qt=5.9.7=h5867ecd_1
   - readline=8.1.2=h0f457ee_0
   - scipy=1.5.0=py38h18bccfc_0
+  - seaborn=0.12.2=py38h06a4308_0
   - setuptools=59.8.0=py38h578d9bd_1
   - sip=4.19.13=py38h295c915_0
   - six=1.16.0=pyh6c4a22f_0

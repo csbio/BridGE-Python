@@ -6,9 +6,6 @@ cat <<EOF
 $*
  Usage: data_remove_outlier.sh <[options]>
 
- DESCRIPTION
- Data processing version 1 (V1_NIND) : no imputation, no deleterious SNP prioritization
-
  GENERAL INPUTS:
 
   --plinkFile=PLINKFILE

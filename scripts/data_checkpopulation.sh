@@ -48,13 +48,18 @@ options=$@
 arguments=${options}
 
 
+# default value for prj1000Pop
+default_value="GIH" # Default value
+prj1000Pop=("$default_value") # Default value
+
 for argument in $options
 do
      case $argument in
      --plinkFile=*) plinkFile=${argument/*=/""} ;;
      --bridgeDir=*) bridgeDir=${argument/*=/""} ;;
      --legendPos=*) legendPos=${argument/*=/""} ;;
-     --prj1000Pop=*) prj1000Pop=${argument/*=/""} ;;
+#     --prj1000Pop=*) prj1000Pop=${argument/*=/""} ;;
+     --prj1000Pop=*) IFS=',' read -r -a prj1000Pop <<< "${argument/*=/""}" ;;
      --prj1000File=*) prj1000File=${argument/*=/""} ;;
      --popIDFile=*) popIDFile=${argument/*=/""} ;;
      esac
@@ -64,7 +69,7 @@ done
 if [ -z "${plinkFile}" ]; then printf "Please specify plinkFile."; exit; fi
 if [ -z ${bridgeDir} ]; then bridgeDir=`pwd`; fi
 if [ -z ${legendPos} ]; then legendPos=southeast; fi
-if [ -z ${prj1000Pop} ]; then prj1000Pop=GIH; fi
+#if [ -z ${prj1000Pop} ]; then prj1000Pop=GIH; fi
 if [ -z ${prj1000File} ]; then prj1000File=${bridgeDir}/1000_genome_project/ALL.shapeit2_integrated_v1a.GRCh38.20181129.phased.rsid; fi
 if [ -z ${popIDFile} ]; then popIDFile=${bridgeDir}/1000_genome_project/allpopid.txt; fi
 
@@ -101,6 +106,12 @@ if [[ ! "${prj1000Pop}" =~ ^(CEU|CHB|ASW|YRI)$ ]]; then
      grep -w ${prj1000Pop} ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
 fi
 
+for pop in "${prj1000Pop[@]}"; do
+    if [[ ! "${pop}" =~ ^(CEU|CHB|ASW|YRI)$ ]]; then 
+      grep -w ${prj1000Pop} ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
+    fi
+done
+
 # filter out nonfounders
 plink --bfile intermediate/prj1000_tmp0 -filter-founders --allow-no-sex --make-bed --out intermediate/prj1000_tmp1 > /dev/null
 
@@ -133,29 +144,52 @@ done
 
 # genereate population idex
 z=0
-for i in `echo CEU CHB ASW YRI ${prj1000Pop} | xargs -n1 | sort -u | xargs`; do z=`echo ${z} 0`; done
+#for i in `echo CEU CHB ASW YRI ${prj1000Pop} | xargs -n1 | sort -u | xargs`; do z=`echo ${z} 0`; done
 
-echo `echo CEU CHB ASW YRI ${prj1000Pop} | xargs -n1 | sort -u | xargs` StudyPop > intermediate/allpopid.txt
+#echo `echo CEU CHB ASW YRI ${prj1000Pop} | xargs -n1 | sort -u | xargs` StudyPop > intermediate/allpopid.txt
 
-while read line
-do
-  pattern=`echo ${line} | awk '{print $1 " " $2}'`
-  pop=`grep -w "${pattern}" ${popIDFile} | awk '{print $3}'`
+valid_values=("CEU" "CHB" "ASW" "YRI")
+pop_values=("${valid_values[@]}" ${prj1000Pop[@]})
 
-  if [ "${pop}" == "CEU" ]; then
-    echo ${pattern} `echo $z | awk '{ $1=1; print }'` >> intermediate/allpopid.txt
-  elif [ "${pop}" == "CHB" ]; then
-    echo ${pattern} `echo $z | awk '{ $2=1; print }'` >> intermediate/allpopid.txt
-  elif [ "${pop}" == "ASW" ]; then
-    echo ${pattern} `echo $z | awk '{ $3=1; print }'` >> intermediate/allpopid.txt
-  elif [ "${pop}" == "${prj1000Pop}" ]; then
-    echo ${pattern} `echo $z | awk '{ $4=1; print }'` >> intermediate/allpopid.txt
-  elif [ "${pop}" == "YRI" ]; then
-    echo ${pattern} `echo $z | awk '{ $5=1;print }'` >> intermediate/allpopid.txt
+for i in $(printf '%s\n' "${pop_values[*]}" | sort -u); do
+  z+=" 0"
+done
+
+echo $(printf '%s\n' "${pop_values[*]}" | sort -u) StudyPop > intermediate/allpopid.txt
+
+
+num_columns=$(( ${#pop_values[@]} + 1 ))
+while read -r line; do
+  pattern=$(echo "$line" | awk '{print $1 " " $2}')
+  pop=$(grep -w "$pattern" "$popIDFile" | awk '{print $3}')
+
+  if [[ "${pop_values[@]}" =~ "$pop" ]]; then
+    idx=$(printf '%s\n' "${pop_values[@]}" | awk -v p="$pop" 'BEGIN{ORS="\n";NR=0}$1==p{print NR}')
+    echo "$pattern $(echo "$z" | awk -v i="$idx" '{ $i=1; print }')"
   else
-    echo ${pattern} `echo $z | awk -v x=6, '{ $x=1; print }'` >> intermediate/allpopid.txt
+    echo "$pattern $(echo "$z" | awk -v x="$num_columns" '{$x=1; print}')"
   fi
-done < intermediate/allpop_tmp.fam
+done < intermediate/allpop_tmp.fam >> intermediate/allpopid.txt
+
+#while read line
+#do
+#  pattern=`echo ${line} | awk '{print $1 " " $2}'`
+#  pop=`grep -w "${pattern}" ${popIDFile} | awk '{print $3}'`
+
+#  if [ "${pop}" == "CEU" ]; then
+#    echo ${pattern} `echo $z | awk '{ $1=1; print }'` >> intermediate/allpopid.txt
+#  elif [ "${pop}" == "CHB" ]; then
+#    echo ${pattern} `echo $z | awk '{ $2=1; print }'` >> intermediate/allpopid.txt
+#  elif [ "${pop}" == "ASW" ]; then
+#    echo ${pattern} `echo $z | awk '{ $3=1; print }'` >> intermediate/allpopid.txt
+#  elif [ "${pop}" == "${prj1000Pop}" ]; then
+#    echo ${pattern} `echo $z | awk '{ $4=1; print }'` >> intermediate/allpopid.txt
+#  elif [ "${pop}" == "YRI" ]; then
+#    echo ${pattern} `echo $z | awk '{ $5=1;print }'` >> intermediate/allpopid.txt
+#  else
+#    echo ${pattern} `echo $z | awk -v x=6, '{ $x=1; print }'` >> intermediate/allpopid.txt
+#  fi
+#done < intermediate/allpop_tmp.fam
 
 # To perform principal components or MDS analysis, it is also important that we use SNPs that are not too correlated.
 plink --bfile intermediate/allpop_tmp --allow-no-sex --indep-pairwise 50 5 0.2 --out intermediate/prunedsnps_tmp > /dev/null
