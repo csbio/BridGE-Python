@@ -102,9 +102,9 @@ grep -w ASW ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
 grep -w YRI ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
 
 # add ${prj1000Pop} if it's not in CEU, CHB, YRI and ASW 
-if [[ ! "${prj1000Pop}" =~ ^(CEU|CHB|ASW|YRI)$ ]]; then 
-     grep -w ${prj1000Pop} ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
-fi
+#if [[ ! "${prj1000Pop}" =~ ^(CEU|CHB|ASW|YRI)$ ]]; then 
+#     grep -w ${prj1000Pop} ${popIDFile} | awk '{print $1 "\t" $2}' >> intermediate/sublist.tmp
+#fi
 
 for pop in "${prj1000Pop[@]}"; do
     if [[ ! "${pop}" =~ ^(CEU|CHB|ASW|YRI)$ ]]; then 
@@ -122,13 +122,13 @@ plink --bfile intermediate/prj1000_tmp1 --keep intermediate/sublist.tmp --allow-
 plink --bfile intermediate/prj1000_tmp2 --biallelic-only strict --allow-no-sex --make-bed --out intermediate/prj1000_tmp3 > /dev/null
 
 # merge 1000 project data with study data
-plink --bfile intermediate/prj1000_tmp3 --bmerge raw/${plinkFile} --allow-no-sex --make-bed --out intermediate/allpop_tmp > /dev/null
+plink --bfile intermediate/prj1000_tmp3 --bmerge raw/${plinkFile} --allow-no-sex --make-bed --out intermediate/allpop_tmp > /dev/null 2> /dev/null
 
 # if any SNPs in two datasets have different alleles, there will be error "variants with 3+ alleles present"
 if [ -f "allpop_tmp-merge.missnp" ]; then
   plink --bfile intermediate/prj1000_tmp3 --exclude intermediate/allpop_tmp-merge.missnp --allow-no-sex --make-bed --out intermediate/prj1000_tmp4 > /dev/null
   plink --bfile raw/${plinkFile} --exclude intermediate/allpop_tmp-merge.missnp --allow-no-sex --make-bed --out  intermediate/${plinkFile}_tmp1 > /dev/null
-  plink --bfile intermediate/prj1000_tmp4 --bmerge intermediate/${plinkFile}_tmp1 --allow-no-sex --make-bed --out intermediate/allpop_tmp > /dev/null
+  plink --bfile intermediate/prj1000_tmp4 --bmerge intermediate/${plinkFile}_tmp1 --allow-no-sex --make-bed --out intermediate/allpop_tmp > /dev/null 2> /dev/null
 fi
 
 
@@ -149,13 +149,13 @@ z=0
 #echo `echo CEU CHB ASW YRI ${prj1000Pop} | xargs -n1 | sort -u | xargs` StudyPop > intermediate/allpopid.txt
 
 valid_values=("CEU" "CHB" "ASW" "YRI")
-pop_values=("${valid_values[@]}" ${prj1000Pop[@]})
+pop_values=("${valid_values[@]}" "${prj1000Pop[@]}")
 
-for i in $(printf '%s\n' "${pop_values[*]}" | sort -u); do
+for i in $(printf '%s\n' "${pop_values[*]}"); do
   z+=" 0"
 done
 
-echo $(printf '%s\n' "${pop_values[*]}" | sort -u) StudyPop > intermediate/allpopid.txt
+echo $(printf '%s\n' "${pop_values[@]}") StudyPop > intermediate/allpopid.txt
 
 
 num_columns=$(( ${#pop_values[@]} + 1 ))
@@ -163,7 +163,7 @@ while read -r line; do
   pattern=$(echo "$line" | awk '{print $1 " " $2}')
   pop=$(grep -w "$pattern" "$popIDFile" | awk '{print $3}')
 
-  if [[ "${pop_values[@]}" =~ "$pop" ]]; then
+  if [[ -n "$pop" ]]  && [[ "${pop_values[@]}" =~ "$pop" ]]; then
     idx=$(printf '%s\n' "${pop_values[@]}" | awk -v p="$pop" 'BEGIN{ORS="\n";NR=0}$1==p{print NR}')
     echo "$pattern $(echo "$z" | awk -v i="$idx" '{ $i=1; print }')"
   else

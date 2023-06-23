@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 import sys
 
 
@@ -27,6 +28,7 @@ import sys
 
 
 if __name__ == '__main__':
+	rcParams['font.family'] = 'sans-serif'
 	mds_file = sys.argv[1]
 	pop_id_file = sys.argv[2]
 	prj1000Pop = sys.argv[3]

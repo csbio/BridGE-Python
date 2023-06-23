@@ -124,8 +124,8 @@ def fdrsampleperm(ssmFile, BPMindFile, pcut, minpath, N, genesetname=None):
 
     # calling calculate_fdr() function to compute FDRs
     fdrBPM1, fdrBPM2 = calculate_fdr(bpmdf, bpm_cols, bpm_pvdf, bpm_pv_cols, pcut, N, 'bpm')
-    fdrWPM1, fdrWPM2 = calculate_fdr(wpmdf, wpm_cols, wpm_pvdf, wpm_pv_cols, pcut, N, 'wpm')
-    fdrPATH1, fdrPATH2 = calculate_fdr(pathdf, path_cols, path_pvdf, path_pv_cols, pcut, N, 'path')
+    fdrWPM1, fdrWPM2 = calculate_fdr(wpmdf, wpm_cols, wpm_pvdf, wpm_pv_cols, 0.05, N, 'wpm')
+    fdrPATH1, fdrPATH2 = calculate_fdr(pathdf, path_cols, path_pvdf, path_pv_cols, 0.05, N, 'path')
 
     bpm_ranksum = bpmdf[bpm_cols[0:1]]
     bpm_ranksum.columns = ['bpm_ranksum']

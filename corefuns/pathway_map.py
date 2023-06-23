@@ -5,6 +5,7 @@ from classes import bpmindclass
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib import rcParams
 from classes import fdrresultsclass
 from corefuns import check_BPM_WPM_redundancy as cbwr
 from networkx.drawing.nx_agraph import to_agraph
@@ -12,7 +13,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_group_tmp,bpm_limit=20):
-	
+	rcParams['font.family'] = 'sans-serif'
 	# load results file(FDRs)
 	#fdr_file = project_dir + '/' + resultsfile
 	pklin = open(resultsfile,'rb')
@@ -217,8 +218,8 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 			if val == 1:
 				p1 = used_pathways[i]
 				p2 = used_pathways[j]
-				G.add_edge(inds[p1],inds[p2],color='yellow')
-				G.add_edge(inds[p2],inds[p1],color='yellow')
+				G.add_edge(inds[p1],inds[p2],color='orange')
+				G.add_edge(inds[p2],inds[p1],color='orange')
 			elif val == -1:
 				p1 = used_pathways[i]
 				p2 = used_pathways[j]
@@ -244,7 +245,7 @@ def draw_map(project_dir,fdrcut,resultsfile,BPM_group_tmp,WPM_group_tmp,PATH_gro
 	legend_elements = [Line2D([0], [0], marker='o', color='w', label='pathway',markerfacecolor='lightblue', markersize=15)]
 	#legend_elements.append(Line2D([0], [0], marker='o', color='w', label='protective PATH pwathway',markerfacecolor='yellow', markersize=15))
 	#legend_elements.append(Line2D([0], [0], marker='o', color='w', label='risk PATH pwathway',markerfacecolor='blue', markersize=15))
-	legend_elements.append(Line2D([0], [0], color='yellow', lw=4, label='protective interaction'))
+	legend_elements.append(Line2D([0], [0], color='orange', lw=4, label='protective interaction'))
 	legend_elements.append(Line2D([0], [0], color='blue', lw=4, label='risk interaction'))
 	legend_elements.append(Line2D([0], [0], marker='o', color='w', label='self loops indicate WPM interactions',markerfacecolor='w', markersize=1))
 	plt.legend(handles=legend_elements, loc='lower left')
