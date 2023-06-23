@@ -179,7 +179,7 @@ if __name__ == '__main__':
 					gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers,densitycutoff)
 		else:
 			ssmfile = project_dir+'/intermediate/'+ssmfile
-		gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers,densitycutoff)
+			gs.genstats(ssmfile,bpmfile,binaryNetwork,snpPerms,minPath,n_workers,densitycutoff)
 
 	elif job == 'ComputeFDR':
 		bpmfile = project_dir+'/intermediate/BPMind.pkl'
