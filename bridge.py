@@ -208,6 +208,7 @@ if __name__ == '__main__':
 		if not path.exists(snpgenemappingfile):
 			sys.exit('snpgenemappingfile not found, check mapping Distance arg')
 		if ssmfile == None:
+			imported=False
 			if model == 'combined':
 				ssmfile = project_dir+'/intermediate/ssM_mhygessi_combined_R0.pkl'
 				resultsfile = project_dir+'/intermediate/results_ssM_mhygessi_combined_R0.pkl'
@@ -217,8 +218,9 @@ if __name__ == '__main__':
 		else:
 			resultsfile = project_dir+'/intermediate/results_'+ ssmfile
 			ssmfile = project_dir+'/intermediate/'+ssmfile
+			imported=True
 		if not path.exists(ssmfile):
 			sys.exit('interaction file not found, check model arg')
 		if not path.exists(resultsfile):
 			sys.exit('results file from analysis module not found')
-		cl.collectresults(resultsfile,fdrcut,ssmfile,bpmfile,snppathwayfile,snpgenemappingfile, densitycutoff)
+		cl.collectresults(resultsfile,fdrcut,ssmfile,bpmfile,snppathwayfile,snpgenemappingfile,imported, densitycutoff)

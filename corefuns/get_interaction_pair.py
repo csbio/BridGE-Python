@@ -43,7 +43,7 @@ def hygetest_caller(input_row):
 	return ht.hygetest(input_row[0],input_row[1],input_row[2],input_row[3])
 
 
-def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,snp2genefile,path_ids,fdrcutoff,densitycutoff=None):
+def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,snp2genefile,path_ids,fdrcutoff,imported_ssm,densitycutoff=None):
 	pklin = open(snp2genefile,'rb')
 	snp2gene = pickle.load(pklin)
 	pklin = open(snp2pathwayfile,'rb')
@@ -380,9 +380,13 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 		if model == 'RR' or model == 'RD' or model == 'DD' or model == 'combined':
 			t = {'snp1': snps1, 'chr1': chr1, 'loc1': pos1, 'gene1': genes1, 'snp2': snps2 , 'chr2': chr2, 'loc2':pos2,  'gene2': genes2,'GI type': GT_type,'case frequency': freq_case,'control frequency': freq_control,
 				'GI': GI,'OR': odds_ratio,'effect': effect, 'LD': ld}
-			output_pair = pd.DataFrame(data=t,columns=['snp1','chr1','loc1', 'gene1', 'snp2','chr2','loc2', 'gene2', 'GI type', 'case frequency', 'control frequency', 'GI',
-				'OR', 'effect', 'LD' ])
-			output_pair.sort_values('GI', ascending=False ,inplace=True)
+		else:
+			t = {'snp1': snps1, 'chr1': chr1, 'loc1': pos1, 'gene1': genes1, 'snp2': snps2 , 'chr2': chr2, 'loc2':pos2,  'gene2': genes2,'GI type': 'imported','case frequency': freq_case,'control frequency': freq_control,
+				'GI': GI,'OR': odds_ratio,'effect': effect, 'LD': ld}
+		output_pair = pd.DataFrame(data=t,columns=['snp1','chr1','loc1', 'gene1', 'snp2','chr2','loc2', 'gene2', 'GI type', 'case frequency', 'control frequency', 'GI',
+			'OR', 'effect', 'LD' ])
+		output_pair.sort_values('GI', ascending=False ,inplace=True)
+		
 
 		# adding to the interaction table
 		n_prev = len(interaction_table)
@@ -522,6 +526,9 @@ def get_interaction_pair(n,path1,path2,effects,ssmfile,bpmfile,snp2pathwayfile,s
 	#	interaction_table.to_excel(writer,index=False)
 	#	writer.save()
 
+	# remove non-relevant columns if ssm is improted
+	if imported_ssm:
+		interaction_table = interaction_table.drop(labels=['OR','GI type', 'case frequency', 'control frequency'],axis=1)
 	writer = pd.ExcelWriter(list_file,engine='xlsxwriter')
 	interaction_table.to_excel(writer, index=False, sheet_name='Sheet1')
 	workbook  = writer.book
